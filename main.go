@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -11,8 +12,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
 
+	"github.com/questdb/go-questdb-client/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -78,20 +79,11 @@ func main() {
 	sniMap := make(map[IpProto]map[int]*TLS)
 
 	var pkts = make([]*Packet, 0, len(tsPackets))
-	prevTime := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 	for _, tsPkt := range tsPackets {
 		pkt, err := tsPkt.ToPacket()
 		if err != nil {
 			log.Fatalln(err)
 		}
-
-		if prevTime == pkt.Time {
-			pkt.Time = pkt.Time.Add(15 * time.Microsecond)
-		}
-		if prevTime == pkt.Time {
-			log.Fatalf("prev and current pkt time are the same: %s", tsPkt.Source.Layers.TimeEpoch[0])
-		}
-		prevTime = pkt.Time
 
 		if _, ok := sniMap[pkt.IpProto]; !ok {
 			sniMap[pkt.IpProto] = make(map[int]*TLS)
@@ -120,10 +112,32 @@ func main() {
 
 	log.Printf("found %d pkts", len(pkts))
 
-	savedPkts, err := SendPacketsToQuestDB(pkts, client, tableName)
+	ctx := context.TODO()
+
+	c, err := questdb.LineSenderFromConf(ctx, "http::addr=localhost:9000;username=admin;password=quest;retry_timeout=0")
 	if err != nil {
-		log.Fatalf("error saving pkts: %v", err)
+		panic("Failed to create client")
+	}
+	defer c.Close(ctx)
+
+	for _, pkt := range pkts {
+		err := c.Table(tableName).
+			Symbol("ip_proto", pkt.IpProto.String()).
+			Symbol("tls_sni", pkt.Sni).
+			Symbol("tls_alpn", pkt.Alpn).
+			StringColumn("ip_src", pkt.IpSrc).
+			Int64Column("port_src", int64(pkt.PortSrc)).
+			StringColumn("ip_dst", pkt.IpDst).
+			Int64Column("port_dst", int64(pkt.PortDst)).
+			Int64Column("frame_len", int64(pkt.FrameLen)).
+			Int64Column("stream_index", int64(pkt.StreamIndex)).
+			At(ctx, pkt.Time)
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
-	log.Printf("saved %d pkts in table: %s", savedPkts, tableName)
+	if err := c.Flush(ctx); err != nil {
+		log.Fatalln(err)
+	}
 }
