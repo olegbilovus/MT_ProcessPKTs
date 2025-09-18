@@ -24,6 +24,7 @@ type TsharkPacket struct {
 	} `json:"_source"`
 }
 
+//goland:noinspection D
 func (p *TsharkPacket) ToPacket() (*Packet, error) {
 	tsPkt := p.Source.Layers
 	var (
@@ -90,16 +91,16 @@ func (p *TsharkPacket) ToPacket() (*Packet, error) {
 	if len(tsPkt.SNI) != 0 {
 		sni := tsPkt.SNI[0]
 		if len(sni) != 0 {
-			tls = &TLS{sni: sni}
+			tls = &TLS{Sni: sni}
 		}
 	}
 	if len(tsPkt.ALPN) != 0 {
 		alpn := tsPkt.ALPN[0]
 		if len(alpn) != 0 {
 			if tls != nil {
-				tls.alpn = alpn
+				tls.Alpn = alpn
 			} else {
-				tls = &TLS{alpn: alpn}
+				tls = &TLS{Alpn: alpn}
 			}
 		}
 	}
@@ -120,24 +121,24 @@ func (p *TsharkPacket) ToPacket() (*Packet, error) {
 }
 
 type TLS struct {
-	sni  string
-	alpn string
+	Sni  string `json:"tls_sni"`
+	Alpn string `json:"tls_alpn"`
 }
 
 func (t TLS) String() string {
-	return t.sni + " - " + t.alpn
+	return t.Sni + " - " + t.Alpn
 }
 
 type Packet struct {
-	Time        time.Time
-	IpSrc       string
-	PortSrc     int
-	IpDst       string
-	PortDst     int
-	FrameLen    int
-	IpProto     IpProto
-	TLS         *TLS
-	StreamIndex int
+	Time     time.Time `json:"ts"`
+	IpSrc    string    `json:"ip_src"`
+	PortSrc  int       `json:"port_src"`
+	IpDst    string    `json:"ip_dst"`
+	PortDst  int       `json:"port_dst"`
+	FrameLen int       `json:"frame_len"`
+	IpProto  IpProto   `json:"ip_proto"`
+	*TLS
+	StreamIndex int `json:"stream_index"`
 }
 
 func (p *Packet) String() string {

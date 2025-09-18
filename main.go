@@ -1,23 +1,48 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
+	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
-	"github.com/questdb/go-questdb-client/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 //goland:noinspection D
 func main() {
+	log.SetReportCaller(true)
+	log.SetFormatter(&log.TextFormatter{FullTimestamp: true,
+		PadLevelText: true,
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			filename := path.Base(frame.File) + ":" + strconv.Itoa(frame.Line)
+			return "", filename
+		}})
+	log.SetLevel(log.TraceLevel)
+
 	var pcapFile = flag.String("pcap", "capture.pcap", "path to the pcap file")
 	var filter = flag.String("filter", "", "filter to use")
+	var verbose = flag.Bool("v", false, "verbose output")
 	flag.Parse()
+
+	var err error
+
+	client, err := NewQuestDBClient("http://127.0.0.1:9000")
+	if err != nil {
+		log.Fatalf("Failed to create QuestDB client: %v", err)
+	}
+	tableName := "packets_" + filepath.Base(*pcapFile)
+	tableName = strings.TrimSuffix(tableName, filepath.Ext(tableName))
+	if err := CreatePacketTable(client, tableName); err != nil {
+		log.Fatalln(err)
+	}
 
 	cmd := exec.Command(
 		"tshark",
@@ -50,14 +75,6 @@ func main() {
 		log.Fatalf("Failed to parse JSON: %v", err)
 	}
 
-	ctx := context.TODO()
-
-	client, err := questdb.LineSenderFromConf(ctx, "http::addr=localhost:9000;username=admin;password=quest;retry_timeout=0")
-	if err != nil {
-		panic("Failed to create client")
-	}
-	defer client.Close(ctx)
-
 	sniMap := make(map[IpProto]map[int]*TLS)
 
 	var pkts = make([]*Packet, 0, len(tsPackets))
@@ -69,7 +86,7 @@ func main() {
 		}
 
 		if prevTime == pkt.Time {
-			pkt.Time = pkt.Time.Add(15 * time.Nanosecond)
+			pkt.Time = pkt.Time.Add(15 * time.Microsecond)
 		}
 		if prevTime == pkt.Time {
 			log.Fatalf("prev and current pkt time are the same: %s", tsPkt.Source.Layers.TimeEpoch[0])
@@ -86,18 +103,27 @@ func main() {
 
 		tls := sniMap[pkt.IpProto][pkt.StreamIndex]
 		if pkt.TLS != nil {
-			if len(pkt.TLS.sni) != 0 {
-				tls.sni = pkt.TLS.sni
+			if len(pkt.TLS.Sni) != 0 {
+				tls.Sni = pkt.TLS.Sni
 			}
-			if len(pkt.TLS.alpn) != 0 {
-				tls.alpn = pkt.TLS.alpn
+			if len(pkt.TLS.Alpn) != 0 {
+				tls.Alpn = pkt.TLS.Alpn
 			}
 		}
 		pkt.TLS = tls
 
 		pkts = append(pkts, pkt)
-		fmt.Println(pkt)
+		if *verbose {
+			log.Debugln(pkt)
+		}
 	}
 
-	fmt.Printf("found %d pkts", len(pkts))
+	log.Printf("found %d pkts", len(pkts))
+
+	savedPkts, err := SendPacketsToQuestDB(pkts, client, tableName)
+	if err != nil {
+		log.Fatalf("error saving pkts: %v", err)
+	}
+
+	log.Printf("saved %d pkts in table: %s", savedPkts, tableName)
 }
