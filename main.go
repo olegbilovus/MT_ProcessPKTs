@@ -34,15 +34,11 @@ func main() {
 	flag.Parse()
 
 	var err error
-
-	client, err := NewQuestDBClient("http://127.0.0.1:9000")
-	if err != nil {
-		log.Fatalf("Failed to create QuestDB client: %v", err)
-	}
 	tableName := "packets_" + filepath.Base(*pcapFile)
 	tableName = strings.TrimSuffix(tableName, filepath.Ext(tableName))
-	if err := CreatePacketTable(client, tableName); err != nil {
-		log.Fatalln(err)
+
+	if err := InitQuestDB("http://127.0.0.1:9000", tableName); err != nil {
+		log.Fatalf("failed to init QuestDB: %v", err)
 	}
 
 	cmd := exec.Command(
@@ -67,17 +63,16 @@ func main() {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Fatalf("Failed to run tshark: %v", err)
+		log.Fatalf("failed to run tshark: %v", err)
 	}
 
 	// This can use a lot of memory depending on the number of packets
 	var tsPackets []TsharkPacket
 	if err := json.Unmarshal(output, &tsPackets); err != nil {
-		log.Fatalf("Failed to parse JSON: %v", err)
+		log.Fatalf("failed to parse JSON: %v", err)
 	}
 
 	sniMap := make(map[IpProto]map[int]*TLS)
-
 	var pkts = make([]*Packet, 0, len(tsPackets))
 	for _, tsPkt := range tsPackets {
 		pkt, err := tsPkt.ToPacket()
@@ -90,7 +85,7 @@ func main() {
 		}
 
 		if _, ok := sniMap[pkt.IpProto][pkt.StreamIndex]; !ok {
-			sniMap[pkt.IpProto][pkt.StreamIndex] = &TLS{}
+			sniMap[pkt.IpProto][pkt.StreamIndex] = &TLS{UNKNOWN, UNKNOWN}
 		}
 
 		tls := sniMap[pkt.IpProto][pkt.StreamIndex]
@@ -114,17 +109,19 @@ func main() {
 
 	ctx := context.TODO()
 
-	c, err := questdb.LineSenderFromConf(ctx, "http::addr=localhost:9000;username=admin;password=quest;retry_timeout=0")
+	client, err := questdb.LineSenderFromConf(ctx, "http::addr=localhost:9000;username=admin;password=quest;retry_timeout=0")
 	if err != nil {
-		panic("Failed to create client")
+		log.Fatalf("failed to create QuestDB client: %v", err)
 	}
-	defer c.Close(ctx)
+	defer client.Close(ctx)
 
 	for _, pkt := range pkts {
-		err := c.Table(tableName).
+		err := client.Table(tableName).
 			Symbol("ip_proto", pkt.IpProto.String()).
 			Symbol("tls_sni", pkt.Sni).
 			Symbol("tls_alpn", pkt.Alpn).
+			Symbol("ip_src_type", pkt.IpSrcType.String()).
+			Symbol("ip_dst_type", pkt.IpDstType.String()).
 			StringColumn("ip_src", pkt.IpSrc).
 			Int64Column("port_src", int64(pkt.PortSrc)).
 			StringColumn("ip_dst", pkt.IpDst).
@@ -137,7 +134,9 @@ func main() {
 		}
 	}
 
-	if err := c.Flush(ctx); err != nil {
+	if err := client.Flush(ctx); err != nil {
 		log.Fatalln(err)
 	}
+
+	log.Infof("saved pkts in QuestDB on table: %s", tableName)
 }

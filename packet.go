@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"strconv"
 	"time"
 )
@@ -117,6 +118,9 @@ func (p *TsharkPacket) ToPacket() (*Packet, error) {
 		StreamIndex: streamIndex,
 	}
 
+	pkt.IpSrcType = GetIpType(pkt.IpSrc)
+	pkt.IpDstType = GetIpType(pkt.IpDst)
+
 	return pkt, nil
 }
 
@@ -129,14 +133,44 @@ func (t TLS) String() string {
 	return t.Sni + " - " + t.Alpn
 }
 
+type IpType int
+
+const (
+	LOCAL IpType = iota
+	PUBLIC
+)
+
+func (p IpType) String() string {
+	switch p {
+	case LOCAL:
+
+		return "LOCAL"
+	case PUBLIC:
+		return "PUBLIC"
+	default:
+		return UNKNOWN
+
+	}
+}
+
+func GetIpType(ipStr string) IpType {
+	ip := net.ParseIP(ipStr)
+	if ip.IsLoopback() || ip.IsPrivate() {
+		return LOCAL
+	}
+	return PUBLIC
+}
+
 type Packet struct {
-	Time     time.Time `json:"ts"`
-	IpSrc    string    `json:"ip_src"`
-	PortSrc  int       `json:"port_src"`
-	IpDst    string    `json:"ip_dst"`
-	PortDst  int       `json:"port_dst"`
-	FrameLen int       `json:"frame_len"`
-	IpProto  IpProto   `json:"ip_proto"`
+	Time      time.Time `json:"ts"`
+	IpSrc     string    `json:"ip_src"`
+	IpSrcType IpType    `json:"ip_src_type"`
+	PortSrc   int       `json:"port_src"`
+	IpDst     string    `json:"ip_dst"`
+	IpDstType IpType    `json:"ip_dst_type"`
+	PortDst   int       `json:"port_dst"`
+	FrameLen  int       `json:"frame_len"`
+	IpProto   IpProto   `json:"ip_proto"`
 	*TLS
 	StreamIndex int `json:"stream_index"`
 }

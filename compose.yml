@@ -1,0 +1,52 @@
+services:
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      #- influxdb
+      - questdb
+    networks:
+      - grafana
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_INSTALL_PLUGINS=https://github.com/performancecopilot/grafana-pcp/releases/download/v5.1.1/performancecopilot-pcp-app-5.1.1.zip;performancecopilot-pcp-app
+#  influxdb:
+#    container_name: influxdb
+#    image: influxdb:latest
+#    networks:
+#      - grafana
+#    ports:
+#      - "127.0.0.1:8086:8086"
+#    volumes:
+#      - lib_influxdb2:/var/lib/influxdb2
+#      - etc_influxdb2:/etc/influxdb2
+#    restart: unless-stopped
+
+  questdb:
+      container_name: questdb
+      image: questdb/questdb:latest
+      networks:
+        - grafana
+      ports:
+        - "127.0.0.1:9000:9000"
+        - "127.0.0.1:8812:8812"
+      restart: unless-stopped
+      volumes:
+        - questdb_data:/var/lib/questdb
+
+volumes:
+  grafana-storage:
+    external: true
+#  lib_influxdb2:
+#    external: true
+#  etc_influxdb2:
+#    external: true
+  questdb_data:
+    external: true
+networks:
+  grafana:
+    name: grafana

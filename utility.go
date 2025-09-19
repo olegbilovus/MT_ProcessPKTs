@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const UNKNOWN = "Unknown"
+
 func ConvertTimestamp(timestampStr string) (time.Time, error) {
 	parts := strings.Split(timestampStr, ".")
 	if len(parts) != 2 {

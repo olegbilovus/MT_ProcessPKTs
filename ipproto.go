@@ -467,7 +467,7 @@ func (p IpProto) String() string {
 	case Reserved:
 		return "Reserved"
 	default:
-		return "Unknown"
+		return UNKNOWN
 	}
 }
 
