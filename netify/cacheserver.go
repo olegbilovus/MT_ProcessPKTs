@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -84,23 +85,39 @@ func (c *CacheServer) Shutdown() error {
 }
 
 func (c *CacheServer) getIpData(w http.ResponseWriter, r *http.Request) {
+	muxHandle(c, w, r, "ip", func(s string) bool {
+		return net.ParseIP(s) != nil
+	}, c.ipCacheFilesDir, ipEndpoint, c.ipCacheStats)
+}
+
+var domainRegex = regexp.MustCompile(`^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`)
+
+func (c *CacheServer) getHostnameData(w http.ResponseWriter, r *http.Request) {
+	muxHandle(c, w, r, "hostname", func(s string) bool {
+		return domainRegex.MatchString(s)
+	}, c.hostnameCacheFileDir, hostnameEndpoint, c.hostnameCacheStats)
+}
+
+func muxHandle(c *CacheServer, w http.ResponseWriter, r *http.Request,
+	pathValueName string, validPathValue func(string) bool,
+	cacheDir string, endpoint string, cacheStat *cacheStats) {
+
 	var (
 		body       []byte
 		statusCode = http.StatusOK
 	)
 
-	ipStr := r.PathValue("ip")
-	if ip := net.ParseIP(ipStr); ip == nil {
+	pathValue := r.PathValue(pathValueName)
+	if !validPathValue(pathValue) {
 		statusCode = http.StatusBadRequest
-		body = []byte("{\"Status\": \"invalid ip address " + ipStr + "\"}")
-
+		body = []byte("{\"Status\": \"invalid " + pathValueName + " " + pathValue + "\"}")
 	} else {
-		fileName := ipStr + ".json"
-		file := path.Join(c.ipCacheFilesDir, fileName)
-		liveURL := ipEndpoint + "/" + ipStr + "?x-api-key=" + c.ApiKey
-		statusCode, body = serveCachedOrLive(c.httpClient, file, liveURL, c.ipCacheStats)
+		fileName := pathValue + ".json"
+		file := path.Join(cacheDir, fileName)
+		liveURL := endpoint + "/" + pathValue + "?x-api-key=" + c.ApiKey
+		statusCode, body = serveCachedOrLive(c.httpClient, file, liveURL, cacheStat)
 
-		if err := cacheResponse(c.ipCacheFilesDir, fileName, body); err != nil {
+		if err := cacheResponse(cacheDir, fileName, body); err != nil {
 			statusCode = http.StatusInternalServerError
 			body = []byte("{\"Status\": \"error saving cache file " + file + "\"}")
 		}
@@ -111,16 +128,20 @@ func (c *CacheServer) getIpData(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func (c *CacheServer) getHostnameData(w http.ResponseWriter, _ *http.Request) {
-
+func (c *CacheServer) QueryIPData(ipStr string) (*IPData, error) {
+	return query[IPData](c, "/ips/", ipStr)
 }
 
-func (c *CacheServer) QueryIPData(ipStr string) (*IPData, error) {
+func (c *CacheServer) QueryHostnameData(hostname string) (*HostnameData, error) {
+	return query[HostnameData](c, "/hostnames/", hostname)
+}
+
+func query[T any](c *CacheServer, endpoint string, parameter string) (*T, error) {
 	if !c.isServerOn {
 		return nil, fmt.Errorf("server cache is not running")
 	}
 
-	req, err := c.httpClient.Get(c.httpServerUrl + "/ips/" + ipStr)
+	req, err := c.httpClient.Get(c.httpServerUrl + endpoint + parameter)
 	if err != nil {
 		return nil, err
 	}
@@ -130,16 +151,13 @@ func (c *CacheServer) QueryIPData(ipStr string) (*IPData, error) {
 		return nil, fmt.Errorf(string(body))
 	}
 
-	var ipData IPData
-	if err := json.Unmarshal(body, &ipData); err != nil {
+	var data T
+	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, err
 	}
 
-	return &ipData, nil
-}
+	return &data, nil
 
-func (c *CacheServer) QueryHostnameData(hostname string) *HostnameData {
-	panic("To implement")
 }
 
 // IPCacheStats Returns number of cached and requested resources
