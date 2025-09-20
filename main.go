@@ -138,5 +138,5 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Infof("saved pkts in QuestDB on table: %s", experimentName)
+	log.Infof("saved pkts in QuestDB on table: %s", GetTableName(experimentName))
 }
