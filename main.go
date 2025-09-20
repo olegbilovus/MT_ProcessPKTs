@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/olegbilovus/MT_ProcessPKTs/netify"
 	"github.com/questdb/go-questdb-client/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -31,6 +32,9 @@ func main() {
 	var pcapFile = flag.String("pcap", "capture.pcap", "path to the pcap file")
 	var filter = flag.String("filter", "", "filter to use")
 	var verbose = flag.Bool("v", false, "verbose output")
+	var netifyApiKey = flag.String("netify-apikey", "", "Netify API key")
+	var netifyCacheServerPort = flag.Int("netify-cache-port", 3344, "Netify cache server port")
+	var netidyCacheFilesDir = flag.String("netify-cache-dir", "netify_cache", "Where cache Netify responses")
 	flag.Parse()
 
 	var err error
@@ -72,6 +76,27 @@ func main() {
 		log.Fatalf("failed to parse JSON: %v", err)
 	}
 
+	if len(*netifyApiKey) == 0 {
+		log.Fatalln("invalid Netify api key")
+	}
+	if len(*netidyCacheFilesDir) == 0 {
+		log.Fatalln("invalid Netify cache files dir")
+	}
+
+	netifyCacheServer := netify.CacheServer{
+		ApiKey:          *netifyApiKey,
+		CacheServerPort: *netifyCacheServerPort,
+		CacheFilesDir:   *netidyCacheFilesDir,
+	}
+	if err := netifyCacheServer.Init(); err != nil {
+		log.Fatalf("error starting Netify cache server: %v", err)
+	}
+	defer func() {
+		if err := netifyCacheServer.Shutdown(); err != nil {
+			log.Fatalf("error shutting down Netify cache server: %v", err)
+		}
+	}()
+
 	sniMap := make(map[IpProto]map[int]*TLS)
 	var pkts = make([]*Packet, 0, len(tsPackets))
 	for _, tsPkt := range tsPackets {
@@ -106,6 +131,15 @@ func main() {
 	}
 
 	log.Printf("found %d pkts", len(pkts))
+
+	ipsCached, ipsRequested := netifyCacheServer.IPCacheStats()
+	hostnamesCached, hostnameRequested := netifyCacheServer.HostnameCacheStats()
+	log.WithFields(log.Fields{
+		"ips_cached":          ipsCached,
+		"ips_requested":       ipsRequested,
+		"hostnames_cached":    hostnamesCached,
+		"hostnames_requested": hostnameRequested,
+	}).Info("Netify cache server stats")
 
 	ctx := context.TODO()
 
