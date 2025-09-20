@@ -34,10 +34,10 @@ func main() {
 	flag.Parse()
 
 	var err error
-	tableName := "packets_" + filepath.Base(*pcapFile)
-	tableName = strings.TrimSuffix(tableName, filepath.Ext(tableName))
+	experimentName := filepath.Base(*pcapFile)
+	experimentName = strings.TrimSuffix(experimentName, filepath.Ext(experimentName))
 
-	if err := InitQuestDB("http://127.0.0.1:9000", tableName); err != nil {
+	if err := InitQuestDB("http://127.0.0.1:9000", experimentName); err != nil {
 		log.Fatalf("failed to init QuestDB: %v", err)
 	}
 
@@ -116,7 +116,7 @@ func main() {
 	defer client.Close(ctx)
 
 	for _, pkt := range pkts {
-		err := client.Table(tableName).
+		err := client.Table(GetTableName(experimentName)).
 			Symbol("ip_proto", pkt.IpProto.String()).
 			Symbol("tls_sni", pkt.Sni).
 			Symbol("tls_alpn", pkt.Alpn).
@@ -138,5 +138,5 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Infof("saved pkts in QuestDB on table: %s", tableName)
+	log.Infof("saved pkts in QuestDB on table: %s", experimentName)
 }

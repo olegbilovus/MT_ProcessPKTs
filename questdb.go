@@ -7,23 +7,25 @@ import (
 	"net/url"
 )
 
-func InitQuestDB(URL string, tableName string) error {
+func InitQuestDB(URL string, experimentName string) error {
 	if res, err := http.Get(URL + "/exec?query=" + url.QueryEscape("SELECT NOW();")); err != nil || res.StatusCode > 299 {
 		return fmt.Errorf("unable to ping database. status code: %d, err :%v", res.StatusCode, err)
 	}
 
-	if err := DeletePacketTable(URL, tableName); err != nil {
+	if err := InsertIntoExperimentsTable(URL, experimentName); err != nil {
 		return err
 	}
-
-	if err := CreatePacketTable(URL, tableName); err != nil {
+	if err := DeletePacketTable(URL, experimentName); err != nil {
+		return err
+	}
+	if err := CreatePacketTable(URL, experimentName); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func CreatePacketTable(URL string, tableName string) error {
+func CreatePacketTable(URL string, experimentName string) error {
 	const query = `
 		CREATE TABLE IF NOT EXISTS %s (
 			ts TIMESTAMP,
@@ -40,7 +42,7 @@ func CreatePacketTable(URL string, tableName string) error {
 			stream_index INT
 		), INDEX(tls_sni) TIMESTAMP(ts) PARTITION BY DAY WAL;`
 
-	queryComplete := fmt.Sprintf(query, tableName)
+	queryComplete := fmt.Sprintf(query, GetTableName(experimentName))
 
 	resp, err := http.Get(URL + "/exec?query=" + url.QueryEscape(queryComplete))
 	if resp.StatusCode > 299 {
@@ -51,10 +53,37 @@ func CreatePacketTable(URL string, tableName string) error {
 	return err
 }
 
-func DeletePacketTable(URL string, tableName string) error {
+func InsertIntoExperimentsTable(URL string, experimentName string) error {
+	const queryCreateTable = `
+		CREATE TABLE IF NOT EXISTS experiments (
+			  ts TIMESTAMP,
+			  name VARCHAR,
+			  active BOOLEAN
+			) TIMESTAMP(ts) PARTITION BY DAY WAL DEDUP UPSERT KEYS(ts, name);`
+
+	resp, err := http.Get(URL + "/exec?query=" + url.QueryEscape(queryCreateTable))
+	if resp.StatusCode > 299 {
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("error creating experiments table, status: %s, body: %s", resp.Status, string(body))
+	}
+
+	const queryInsertTable = `INSERT INTO experiments VALUES(0, '%s', true);`
+	queryComplete := fmt.Sprintf(queryInsertTable, experimentName)
+	resp, err = http.Get(URL + "/exec?query=" + url.QueryEscape(queryComplete))
+	if resp.StatusCode > 299 {
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("error inserting experiment into table, status: %s, body: %s", resp.Status, string(body))
+	}
+
+	return err
+}
+
+func DeletePacketTable(URL string, experimentName string) error {
 	const query = `DROP TABLE IF EXISTS %s;`
 
-	queryComplete := fmt.Sprintf(query, tableName)
+	queryComplete := fmt.Sprintf(query, GetTableName(experimentName))
 
 	resp, err := http.Get(URL + "/exec?query=" + url.QueryEscape(queryComplete))
 	if resp.StatusCode > 299 {
@@ -62,6 +91,10 @@ func DeletePacketTable(URL string, tableName string) error {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("error dropping table, status: %s, body: %s", resp.Status, string(body))
 	}
-	return err
 
+	return err
+}
+
+func GetTableName(experimentName string) string {
+	return "packets_" + experimentName
 }
