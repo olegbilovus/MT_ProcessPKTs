@@ -117,173 +117,187 @@
       "type": "williamvenner-timepickerbuttons-panel"
     },
     {
-      "datasource": {
-        "type": "questdb-questdb-datasource",
-        "uid": "${DS_QUESTDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "bytes/$sample_rate",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "points",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "fieldMinMax": false,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
+      "collapsed": true,
       "gridPos": {
-        "h": 19,
+        "h": 1,
         "w": 24,
         "x": 0,
         "y": 3
       },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Total",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.1.1",
-      "targets": [
+      "id": 12,
+      "panels": [
         {
-          "builderOptions": {
-            "fields": [
-              "ts",
-              "frame_len"
-            ],
-            "filters": [],
-            "groupBy": [],
-            "limit": "",
-            "metrics": [
-              {
-                "aggregation": "sum",
-                "alias": "",
-                "field": "frame_len"
-              }
-            ],
-            "mode": "trend",
-            "orderBy": [
-              {
-                "dir": "ASC",
-                "name": "ts"
-              }
-            ],
-            "partitionBy": [],
-            "sampleByAlignTo": "CALENDAR",
-            "sampleByFill": [
-              "NONE_0"
-            ],
-            "table": "packets_test",
-            "timeField": "ts"
-          },
           "datasource": {
             "type": "questdb-questdb-datasource",
             "uid": "${DS_QUESTDB}"
           },
-          "expand": false,
-          "format": 0,
-          "meta": {
-            "builderOptions": {
-              "fields": [
-                "ts",
-                "frame_len"
-              ],
-              "filters": [],
-              "groupBy": [],
-              "limit": "",
-              "metrics": [
-                {
-                  "aggregation": "sum",
-                  "alias": "",
-                  "field": "frame_len"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "bytes/$sample_rate",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "points",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "decbytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 19,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "id": 1,
+          "options": {
+            "legend": {
+              "calcs": [
+                "sum"
               ],
-              "mode": "trend",
-              "orderBy": [
-                {
-                  "dir": "ASC",
-                  "name": "ts"
-                }
-              ],
-              "partitionBy": [],
-              "sampleByAlignTo": "CALENDAR",
-              "sampleByFill": [
-                "NONE_0"
-              ],
-              "table": "packets_test",
-              "timeField": "ts"
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
             }
           },
-          "queryType": "sql",
-          "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
-          "refId": "A",
-          "selectedFormat": 0
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "builderOptions": {
+                "fields": [
+                  "ts",
+                  "frame_len"
+                ],
+                "filters": [],
+                "groupBy": [],
+                "limit": "",
+                "metrics": [
+                  {
+                    "aggregation": "sum",
+                    "alias": "",
+                    "field": "frame_len"
+                  }
+                ],
+                "mode": "trend",
+                "orderBy": [
+                  {
+                    "dir": "ASC",
+                    "name": "ts"
+                  }
+                ],
+                "partitionBy": [],
+                "sampleByAlignTo": "CALENDAR",
+                "sampleByFill": [
+                  "NONE_0"
+                ],
+                "table": "packets_test",
+                "timeField": "ts"
+              },
+              "datasource": {
+                "type": "questdb-questdb-datasource",
+                "uid": "${DS_QUESTDB}"
+              },
+              "expand": false,
+              "format": 0,
+              "meta": {
+                "builderOptions": {
+                  "fields": [
+                    "ts",
+                    "frame_len"
+                  ],
+                  "filters": [],
+                  "groupBy": [],
+                  "limit": "",
+                  "metrics": [
+                    {
+                      "aggregation": "sum",
+                      "alias": "",
+                      "field": "frame_len"
+                    }
+                  ],
+                  "mode": "trend",
+                  "orderBy": [
+                    {
+                      "dir": "ASC",
+                      "name": "ts"
+                    }
+                  ],
+                  "partitionBy": [],
+                  "sampleByAlignTo": "CALENDAR",
+                  "sampleByFill": [
+                    "NONE_0"
+                  ],
+                  "table": "packets_test",
+                  "timeField": "ts"
+                }
+              },
+              "queryType": "sql",
+              "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "refId": "A",
+              "selectedFormat": 0
+            }
+          ],
+          "title": "Bytes/$sample_rate",
+          "type": "timeseries"
         }
       ],
-      "title": "Bytes/$sample_rate",
-      "type": "timeseries"
+      "title": "Packets bytes/$sample_rate",
+      "type": "row"
     },
     {
       "collapsed": false,
@@ -291,7 +305,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 4
       },
       "id": 6,
       "panels": [],
@@ -341,7 +355,7 @@
         "h": 12,
         "w": 17,
         "x": 0,
-        "y": 23
+        "y": 5
       },
       "id": 7,
       "options": {
@@ -423,7 +437,7 @@
           "selectedFormat": 1
         }
       ],
-      "title": "IP GeoHeatMap Egress",
+      "title": "Netify IP GeoHeatMap Egress",
       "type": "geomap"
     },
     {
@@ -452,7 +466,7 @@
         "h": 12,
         "w": 7,
         "x": 17,
-        "y": 23
+        "y": 5
       },
       "id": 8,
       "options": {
@@ -493,7 +507,7 @@
           "refId": "A"
         }
       ],
-      "title": "IPs Geo distribution Egress",
+      "title": "Netify IPs Geo distribution Egress",
       "transformations": [
         {
           "id": "filterFieldsByName",
@@ -551,9 +565,9 @@
       },
       "gridPos": {
         "h": 11,
-        "w": 7,
+        "w": 12,
         "x": 0,
-        "y": 35
+        "y": 17
       },
       "id": 3,
       "options": {
@@ -629,9 +643,9 @@
       },
       "gridPos": {
         "h": 11,
-        "w": 9,
-        "x": 7,
-        "y": 35
+        "w": 12,
+        "x": 12,
+        "y": 17
       },
       "id": 10,
       "options": {
@@ -687,6 +701,19 @@
       "type": "piechart"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 13,
+      "panels": [],
+      "title": "Netify Egress",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
@@ -708,10 +735,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 35
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 29
       },
       "id": 9,
       "options": {
@@ -763,7 +790,247 @@
           }
         }
       ],
-      "title": "IP RDNS Application Egress",
+      "title": "Netify IP RDNS Application Tag Egress",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "id": 15,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^pkts$/",
+          "values": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
+          "refId": "A",
+          "selectedFormat": 2,
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          }
+        }
+      ],
+      "title": "Netify IP RDNS Application Category Tag Egress",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "id": 14,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^pkts$/",
+          "values": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
+          "refId": "A",
+          "selectedFormat": 2,
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          }
+        }
+      ],
+      "title": "Netify Hostname TLS SNI Application Tag Egress",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "id": 11,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^pkts$/",
+          "values": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \r\n  count(tls_sni_netify_app_category_tag) as pkts,\r\n  tls_sni_netify_app_category_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_category_tag",
+          "refId": "A",
+          "selectedFormat": 2,
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          }
+        }
+      ],
+      "title": "Netify Hostname TLS SNI Application Category Tag Egress",
       "type": "piechart"
     }
   ],
@@ -873,13 +1140,13 @@
     ]
   },
   "time": {
-    "from": "2025-08-27T14:14:33.236Z",
-    "to": "2025-09-03T23:24:15.216Z"
+    "from": "2025-08-27T14:14:32.796Z",
+    "to": "2025-09-04T03:57:08.475Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 57,
+  "version": 61,
   "weekStart": ""
 }

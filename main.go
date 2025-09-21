@@ -178,7 +178,10 @@ func main() {
 			} else {
 				pkt.SNINetify.DomainCategoryTag = UNKNOWN
 			}
-
+		} else {
+			pkt.SNINetify.AppTag = UNKNOWN
+			pkt.SNINetify.AppCategoryTag = UNKNOWN
+			pkt.SNINetify.DomainCategoryTag = UNKNOWN
 		}
 
 		err := client.Table(GetTableName(experimentName)).
