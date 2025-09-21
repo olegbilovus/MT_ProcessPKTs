@@ -68,11 +68,11 @@ func (c *CacheServer) Init() error {
 	for range 10 {
 		if conn, err := net.DialTimeout("tcp", c.httpServer.Addr, 500*time.Millisecond); err == nil {
 			conn.Close()
-			log.Warning("Server started")
+			log.Warning("server started")
 			c.isServerOn = true
 			return nil
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 
 	return fmt.Errorf("error starting cache server")
@@ -175,18 +175,44 @@ type cacheStats struct {
 	requested atomic.Int64
 }
 
+const retryDelay = 5 * time.Second
+const maxRetries = 3
+const minRateLimitAvailable = 3
+
+//goland:noinspection D
 func serveCachedOrLive(httpClient *http.Client, cacheFile string, liveURL string, cacheStats *cacheStats) (int, []byte) {
 	if stat, err := os.Stat(cacheFile); err == nil && stat.Size() > 0 {
 		body, _ := os.ReadFile(cacheFile)
 		cacheStats.cached.Add(1)
 		return http.StatusOK, body
 	} else {
-		res, _ := httpClient.Get(liveURL)
-		if res != nil {
-			defer res.Body.Close()
-			body, _ := io.ReadAll(res.Body)
-			cacheStats.requested.Add(1)
-			return res.StatusCode, body
+		for i := 0; i < maxRetries; i++ {
+			res, err := httpClient.Get(liveURL)
+			if err != nil {
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("{\"Status\": \"Error fetching live URL: %v\"}", err))
+			}
+
+			body, readErr := io.ReadAll(res.Body)
+			res.Body.Close()
+			if readErr != nil {
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("{\"Status\": \"Error reading response body: %v\"}", readErr))
+			}
+
+			switch res.StatusCode {
+			case http.StatusOK:
+				cacheStats.requested.Add(1)
+				return res.StatusCode, body
+			case http.StatusTooManyRequests:
+				time.Sleep(retryDelay)
+			default:
+				if remaining := res.Header.Get("X-RateLimit-Remaining"); remaining != "" {
+					remainingInt, err := strconv.Atoi(remaining)
+					if err == nil && remainingInt < minRateLimitAvailable {
+						time.Sleep(5 * time.Second)
+					}
+				}
+				return res.StatusCode, []byte(fmt.Sprintf("{\"Status\": \"Error: %s\"}", res.Status))
+			}
 		}
 		return http.StatusInternalServerError, []byte("{\"Status\": \"Server error\"}")
 	}

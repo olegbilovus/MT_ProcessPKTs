@@ -27,19 +27,25 @@ func main() {
 			filename := path.Base(frame.File) + ":" + strconv.Itoa(frame.Line)
 			return "", filename
 		}})
-	log.SetLevel(log.TraceLevel)
+	log.SetLevel(log.InfoLevel)
 
 	var pcapFile = flag.String("pcap", "capture.pcap", "path to the pcap file")
 	var filter = flag.String("filter", "", "filter to use")
+	var name = flag.String("name", "", "name of the experiment. It will overwrite any existing ones")
 
 	var netifyApiKey = flag.String("netify-apikey", "", "Netify API key")
 	var netifyCacheServerPort = flag.Int("netify-cache-port", 3344, "Netify cache server port")
-	var netidyCacheFilesDir = flag.String("netify-cache-dir", "netify_cache", "Where cache Netify responses")
+	var netifyCacheFilesDir = flag.String("netify-cache-dir", "netify_cache", "Where cache Netify responses")
 	flag.Parse()
 
 	var err error
-	experimentName := filepath.Base(*pcapFile)
-	experimentName = strings.TrimSuffix(experimentName, filepath.Ext(experimentName))
+
+	experimentName := *name
+
+	if len(experimentName) == 0 {
+		experimentName = filepath.Base(*pcapFile)
+		experimentName = strings.TrimSuffix(experimentName, filepath.Ext(experimentName))
+	}
 
 	if err := InitQuestDB("http://127.0.0.1:9000", experimentName); err != nil {
 		log.Fatalf("failed to init QuestDB: %v", err)
@@ -48,14 +54,14 @@ func main() {
 	if len(*netifyApiKey) == 0 {
 		log.Fatalln("invalid Netify api key")
 	}
-	if len(*netidyCacheFilesDir) == 0 {
+	if len(*netifyCacheFilesDir) == 0 {
 		log.Fatalln("invalid Netify cache files dir")
 	}
 
 	netifyCacheServer := netify.CacheServer{
 		ApiKey:          *netifyApiKey,
 		CacheServerPort: *netifyCacheServerPort,
-		CacheFilesDir:   *netidyCacheFilesDir,
+		CacheFilesDir:   *netifyCacheFilesDir,
 	}
 	if err := netifyCacheServer.Init(); err != nil {
 		log.Fatalf("error starting Netify cache server: %v", err)
@@ -111,6 +117,9 @@ func main() {
 	defer client.Close(ctx)
 
 	for _, pkt := range pkts {
+
+		// TODO: netify data
+
 		err := client.Table(GetTableName(experimentName)).
 			Symbol("ip_proto", pkt.IpProto.String()).
 			Symbol("tls_sni", pkt.Sni).

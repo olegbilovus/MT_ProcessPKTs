@@ -173,6 +173,8 @@ type Packet struct {
 	IpProto   IpProto   `json:"ip_proto"`
 	*TLS
 	StreamIndex int `json:"stream_index"`
+	Netify      struct {
+	} `json:"netify"`
 }
 
 func (p *Packet) String() string {
