@@ -185,6 +185,11 @@ type Packet struct {
 	StreamIndex int      `json:"stream_index"`
 	IpSrcNetify NetifyIP `json:"ip_src_netify"`
 	IpDstNetify NetifyIP `json:"ip_dst_netify"`
+	SNINetify   struct {
+		AppTag            string `json:"app_tag"`
+		AppCategoryTag    string `json:"app_category_tag"`
+		DomainCategoryTag string `json:"domain_category_tag"`
+	} `json:"tls_sni_netify"`
 }
 
 func (p *Packet) String() string {

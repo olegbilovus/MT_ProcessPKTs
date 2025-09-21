@@ -53,7 +53,11 @@ func CreatePacketTable(URL string, experimentName string) error {
 			ip_dst_netify_geo_country SYMBOL,
 			ip_dst_netify_geo_city SYMBOL,
 			ip_dst_netify_geo_lon DOUBLE,
-			ip_dst_netify_geo_lat DOUBLE
+			ip_dst_netify_geo_lat DOUBLE,
+			tls_sni_netify_app_tag SYMBOL,
+			tls_sni_netify_app_category_tag SYMBOL,
+			tls_sni_netify_domain_tag SYMBOL
+		                        
 		), INDEX(tls_sni) TIMESTAMP(ts) PARTITION BY DAY WAL;`
 
 	queryComplete := fmt.Sprintf(query, GetTableName(experimentName))

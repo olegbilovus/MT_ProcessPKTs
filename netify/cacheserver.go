@@ -53,6 +53,7 @@ func (c *CacheServer) Init() error {
 	mux.HandleFunc("/ips/{ip}", c.getIpData)
 	mux.HandleFunc("/hostnames/{hostname}", c.getHostnameData)
 	mux.HandleFunc("/stats", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "{\"ips\": {\"r\":%d, \"c\": %d}, \"hostnames\": {\"r\":%d, \"c\": %d}}",
 			c.ipCacheStats.requested.Load(), c.ipCacheStats.cached.Load(),

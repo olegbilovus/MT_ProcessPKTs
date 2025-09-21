@@ -128,10 +128,20 @@ type IPData struct {
 }
 
 type HostnameData struct {
-	Hostname    string              `json:"hostname"`
-	Application ApplicationProperty `json:"application"`
-	Platform    *PlatformProperty   `json:"platform"`
-	Network     *NetworkProperty    `json:"network"`
-	ASN         *ASNProperty        `json:"asn"`
-	IPs         []string            `json:"ips"`
+	StatusCode    int    `json:"status_code"`
+	StatusMessage string `json:"status_message"`
+	Data          struct {
+		Hostname string `json:"hostname"`
+		Domain   *struct {
+			Id       int            `json:"id"`
+			Label    string         `json:"label"`
+			Category CategoryObject `json:"category"`
+		} `json:"domain"`
+
+		Application ApplicationProperty `json:"application"`
+		Platform    *PlatformProperty   `json:"platform"`
+		Network     *NetworkProperty    `json:"network"`
+		ASN         *ASNProperty        `json:"asn"`
+		IPs         []string            `json:"ips"`
+	}
 }

@@ -117,6 +117,7 @@ func main() {
 	)
 
 	ipsMap := map[string]*netify.IPData{}
+	hostnamesMap := map[string]*netify.HostnameData{}
 	/* Can not run this in multiple goroutines because of low rate limit and because of concurrency,
 	it would request the same resources to Netify multiple times which would lead to a higher api consumption
 	*/
@@ -131,7 +132,7 @@ func main() {
 			ipNetifyData, ok := ipsMap[ip]
 			if !ok {
 				if ipNetifyData, err = netifyCacheServer.QueryIPData(ip); err != nil {
-					log.Fatalf("error getting Netify Ip data: %v", err)
+					log.WithField("ip", ip).Fatalf("error getting Netify Ip data: %v", err)
 				}
 				ipsMap[ip] = ipNetifyData
 			}
@@ -156,6 +157,30 @@ func main() {
 			}
 		}
 
+		if len(pkt.Sni) != 0 && pkt.Sni != UNKNOWN {
+			netifySNI, ok := hostnamesMap[pkt.Sni]
+			if !ok {
+				netifySNI, err = netifyCacheServer.QueryHostnameData(pkt.Sni)
+				if err != nil {
+					if strings.ContainsAny(err.Error(), "404") {
+						netifySNI = &netify.HostnameData{}
+						log.WithField("tls_sni", pkt.Sni).Warning("could not find Netify Hostname data: %v", err)
+					} else {
+						log.WithField("tls_sni", pkt.Sni).Fatalf("error getting Netify Hostname data: %v", err)
+					}
+				}
+				hostnamesMap[pkt.Sni] = netifySNI
+			}
+			pkt.SNINetify.AppTag = DefaultIfEmpty(netifySNI.Data.Application.Tag)
+			pkt.SNINetify.AppCategoryTag = DefaultIfEmpty(netifySNI.Data.Application.Category.Tag)
+			if netifySNI.Data.Domain != nil {
+				pkt.SNINetify.DomainCategoryTag = DefaultIfEmpty(netifySNI.Data.Domain.Category.Tag)
+			} else {
+				pkt.SNINetify.DomainCategoryTag = UNKNOWN
+			}
+
+		}
+
 		err := client.Table(GetTableName(experimentName)).
 			Symbol("ip_proto", pkt.IpProto.String()).
 			Symbol("tls_sni", pkt.Sni).
@@ -172,6 +197,9 @@ func main() {
 			Symbol("ip_dst_netify_geo_continent", pkt.IpDstNetify.GeoContinent).
 			Symbol("ip_dst_netify_geo_country", pkt.IpDstNetify.GeoCountry).
 			Symbol("ip_dst_netify_geo_city", pkt.IpDstNetify.GeoCity).
+			Symbol("tls_sni_netify_app_tag", pkt.SNINetify.AppTag).
+			Symbol("tls_sni_netify_app_category_tag", pkt.SNINetify.AppCategoryTag).
+			Symbol("tls_sni_netify_domain_tag", pkt.SNINetify.DomainCategoryTag).
 			Float64Column("ip_src_netify_geo_lon", pkt.IpSrcNetify.GeoLongitude).
 			Float64Column("ip_src_netify_geo_lat", pkt.IpSrcNetify.GeoLatitude).
 			Float64Column("ip_dst_netify_geo_lon", pkt.IpDstNetify.GeoLongitude).
