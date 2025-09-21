@@ -12,10 +12,13 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/olegbilovus/MT_ProcessPKTs/netify"
 	"github.com/questdb/go-questdb-client/v4"
 	log "github.com/sirupsen/logrus"
+	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 )
 
 //goland:noinspection D
@@ -99,15 +102,6 @@ func main() {
 
 	log.Printf("found %d pkts", len(pkts))
 
-	ipsCached, ipsRequested := netifyCacheServer.IPCacheStats()
-	hostnamesCached, hostnameRequested := netifyCacheServer.HostnameCacheStats()
-	log.WithFields(log.Fields{
-		"ips_cached":          ipsCached,
-		"ips_requested":       ipsRequested,
-		"hostnames_cached":    hostnamesCached,
-		"hostnames_requested": hostnameRequested,
-	}).Info("Netify cache server stats")
-
 	ctx := context.TODO()
 
 	client, err := questdb.LineSenderFromConf(ctx, "http::addr=localhost:9000;username=admin;password=quest;retry_timeout=0")
@@ -116,9 +110,42 @@ func main() {
 	}
 	defer client.Close(ctx)
 
-	for _, pkt := range pkts {
+	p := mpb.New(mpb.WithAutoRefresh())
+	bar := p.AddBar(int64(len(pkts)),
+		mpb.PrependDecorators(decor.Name("pkt", decor.WC{C: decor.DindentRight | decor.DextraSpace}),
+			decor.CountersNoUnit("%3d/%3d", decor.WCSyncWidth)),
+	)
 
-		// TODO: netify data
+	ipsMap := map[string]*netify.IPData{}
+	/* Can not run this in multiple goroutines because of low rate limit and because of concurrency,
+	it would request the same resources to Netify multiple times which would lead to a higher api consumption
+	*/
+	for _, pkt := range pkts {
+		start := time.Now()
+		ips := map[string]*NetifyIP{
+			pkt.IpSrc: &pkt.IpSrcNetify,
+			pkt.IpDst: &pkt.IpDstNetify,
+		}
+
+		for ip, ipNetify := range ips {
+			ipNetifyData, ok := ipsMap[ip]
+			if !ok {
+				if ipNetifyData, err = netifyCacheServer.QueryIPData(ip); err != nil {
+					log.Fatalf("error getting Netify Ip data: %v", err)
+				}
+				ipsMap[ip] = ipNetifyData
+			}
+
+			ipNetify.AppTag = ipNetifyData.Data.RDNS.Application.Tag
+			ipNetify.AppCategoryTag = ipNetifyData.Data.RDNS.Application.Category.Tag
+			geoData := ipNetifyData.Data.Geolocation
+			if geoData != nil {
+				ipNetify.GeoContinent = geoData.Continent.Label
+				ipNetify.GeoCountry = geoData.Country.Label
+				ipNetify.GeoLongitude = geoData.Coordinates.Longitude
+				ipNetify.GeoLatitude = geoData.Coordinates.Latitude
+			}
+		}
 
 		err := client.Table(GetTableName(experimentName)).
 			Symbol("ip_proto", pkt.IpProto.String()).
@@ -126,6 +153,18 @@ func main() {
 			Symbol("tls_alpn", pkt.Alpn).
 			Symbol("ip_src_type", pkt.IpSrcType.String()).
 			Symbol("ip_dst_type", pkt.IpDstType.String()).
+			Symbol("ip_src_netify_app_tag", pkt.IpSrcNetify.AppTag).
+			Symbol("ip_src_netify_app_category_tag", pkt.IpSrcNetify.AppCategoryTag).
+			Symbol("ip_src_netify_geo_continent", pkt.IpSrcNetify.GeoContinent).
+			Symbol("ip_src_netify_geo_country", pkt.IpSrcNetify.GeoCountry).
+			Symbol("ip_dst_netify_app_tag", pkt.IpDstNetify.AppTag).
+			Symbol("ip_dst_netify_app_category_tag", pkt.IpDstNetify.AppCategoryTag).
+			Symbol("ip_dst_netify_geo_continent", pkt.IpDstNetify.GeoContinent).
+			Symbol("ip_dst_netify_geo_country", pkt.IpDstNetify.GeoCountry).
+			StringColumn("ip_src_netify_geo_lon", pkt.IpSrcNetify.GeoLongitude).
+			StringColumn("ip_src_netify_geo_lat", pkt.IpSrcNetify.GeoLatitude).
+			StringColumn("ip_dst_netify_geo_lon", pkt.IpDstNetify.GeoLongitude).
+			StringColumn("ip_dst_netify_geo_lat", pkt.IpDstNetify.GeoLatitude).
 			StringColumn("ip_src", pkt.IpSrc).
 			Int64Column("port_src", int64(pkt.PortSrc)).
 			StringColumn("ip_dst", pkt.IpDst).
@@ -133,14 +172,28 @@ func main() {
 			Int64Column("frame_len", int64(pkt.FrameLen)).
 			Int64Column("stream_index", int64(pkt.StreamIndex)).
 			At(ctx, pkt.Time)
+
 		if err != nil {
 			log.Fatalln(err)
 		}
+
+		bar.EwmaIncrement(time.Since(start))
 	}
+
+	bar.Completed()
 
 	if err := client.Flush(ctx); err != nil {
 		log.Fatalln(err)
 	}
+
+	ipsCached, ipsRequested := netifyCacheServer.IPCacheStats()
+	hostnamesCached, hostnameRequested := netifyCacheServer.HostnameCacheStats()
+	log.WithFields(log.Fields{
+		"ips_cached":          ipsCached,
+		"ips_requested":       ipsRequested,
+		"hostnames_cached":    hostnamesCached,
+		"hostnames_requested": hostnameRequested,
+	}).Info("Netify cache server stats")
 
 	log.Infof("saved pkts in QuestDB on table: %s", GetTableName(experimentName))
 }

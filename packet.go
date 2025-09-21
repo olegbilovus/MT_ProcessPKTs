@@ -161,6 +161,15 @@ func GetIpType(ipStr string) IpType {
 	return PUBLIC
 }
 
+type NetifyIP struct {
+	AppTag         string `json:"app_tag"`
+	AppCategoryTag string `json:"app_category_tag"`
+	GeoContinent   string `json:"geo_continent"`
+	GeoCountry     string `json:"geo_country"`
+	GeoLongitude   string `json:"geo_lon"`
+	GeoLatitude    string `json:"geo_lat"`
+}
+
 type Packet struct {
 	Time      time.Time `json:"ts"`
 	IpSrc     string    `json:"ip_src"`
@@ -172,9 +181,9 @@ type Packet struct {
 	FrameLen  int       `json:"frame_len"`
 	IpProto   IpProto   `json:"ip_proto"`
 	*TLS
-	StreamIndex int `json:"stream_index"`
-	Netify      struct {
-	} `json:"netify"`
+	StreamIndex int      `json:"stream_index"`
+	IpSrcNetify NetifyIP `json:"ip_src_netify"`
+	IpDstNetify NetifyIP `json:"ip_dst_netify"`
 }
 
 func (p *Packet) String() string {

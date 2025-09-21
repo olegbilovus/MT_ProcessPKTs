@@ -52,6 +52,12 @@ func (c *CacheServer) Init() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ips/{ip}", c.getIpData)
 	mux.HandleFunc("/hostnames/{hostname}", c.getHostnameData)
+	mux.HandleFunc("/stats", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "{\"ips\": {\"r\":%d, \"c\": %d}, \"hostnames\": {\"r\":%d, \"c\": %d}}",
+			c.ipCacheStats.requested.Load(), c.ipCacheStats.cached.Load(),
+			c.hostnameCacheStats.requested.Load(), c.hostnameCacheStats.cached.Load())
+	})
 
 	c.httpServer = &http.Server{
 		Addr:    ":" + strconv.Itoa(c.CacheServerPort),
@@ -68,7 +74,7 @@ func (c *CacheServer) Init() error {
 	for range 10 {
 		if conn, err := net.DialTimeout("tcp", c.httpServer.Addr, 500*time.Millisecond); err == nil {
 			conn.Close()
-			log.Warning("server started")
+			log.Warning("netify cache server started")
 			c.isServerOn = true
 			return nil
 		}
@@ -203,11 +209,13 @@ func serveCachedOrLive(httpClient *http.Client, cacheFile string, liveURL string
 				cacheStats.requested.Add(1)
 				return res.StatusCode, body
 			case http.StatusTooManyRequests:
+				log.Warning("rate limited, waiting")
 				time.Sleep(retryDelay)
 			default:
 				if remaining := res.Header.Get("X-RateLimit-Remaining"); remaining != "" {
 					remainingInt, err := strconv.Atoi(remaining)
 					if err == nil && remainingInt < minRateLimitAvailable {
+						log.Warning("Not enough rate limit available, waiting")
 						time.Sleep(5 * time.Second)
 					}
 				}

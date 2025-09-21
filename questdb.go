@@ -39,7 +39,19 @@ func CreatePacketTable(URL string, experimentName string) error {
 			ip_proto SYMBOL,
 			tls_sni SYMBOL,
 			tls_alpn SYMBOL,
-			stream_index INT
+			stream_index INT,
+			ip_src_netify_app_tag SYMBOL,
+			ip_src_netify_app_category_tag SYMBOL,
+			ip_src_netify_geo_continent SYMBOL,
+			ip_src_netify_geo_country SYMBOL,
+			ip_src_netify_geo_lon VARCHAR,
+			ip_src_netify_geo_lat VARCHAR,
+			ip_dst_netify_app_tag SYMBOL,
+			ip_dst_netify_app_category_tag SYMBOL,
+			ip_dst_netify_geo_continent SYMBOL,
+			ip_dst_netify_geo_country SYMBOL,
+			ip_dst_netify_geo_lon VARCHAR,
+			ip_dst_netify_geo_lat VARCHAR
 		), INDEX(tls_sni) TIMESTAMP(ts) PARTITION BY DAY WAL;`
 
 	queryComplete := fmt.Sprintf(query, GetTableName(experimentName))
