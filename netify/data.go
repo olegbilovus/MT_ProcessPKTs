@@ -1,20 +1,15 @@
 package netify
 
 type ApplicationProperty struct {
-	Id            int            `json:"id"`
-	Tag           string         `json:"tag"`
-	Label         string         `json:"label"`
-	FullLabel     string         `json:"full_label"`
-	Description   string         `json:"description"`
-	HomePage      HomePageObject `json:"home_page"`
-	Category      CategoryObject `json:"category"`
-	Active        bool           `json:"active"`
-	Favicon       string         `json:"favicon"`
-	Icon          string         `json:"icon"`
-	Logo          string         `json:"logo"`
-	FaviconSource string         `json:"favicon_source"`
-	IconSource    string         `json:"icon_source"`
-	LogoSource    string         `json:"logo_source"`
+	Id          int            `json:"id"`
+	Tag         string         `json:"tag"`
+	Label       string         `json:"label"`
+	FullLabel   string         `json:"full_label"`
+	Description string         `json:"description"`
+	HomePage    HomePageObject `json:"home_page"`
+	Category    CategoryObject `json:"category"`
+	Active      bool           `json:"active"`
+	IconFields
 }
 
 type ASNProperty struct {
@@ -22,18 +17,13 @@ type ASNProperty struct {
 	Tag    string `json:"tag"`
 	Label  string `json:"label"`
 	Entity struct {
-		Id            int            `json:"id"`
-		Tag           string         `json:"tag"`
-		Label         string         `json:"label"`
-		Description   string         `json:"description"`
-		HomePage      HomePageObject `json:"home_page"`
-		Category      CategoryObject `json:"category"`
-		Favicon       string         `json:"favicon"`
-		Icon          string         `json:"icon"`
-		Logo          string         `json:"logo"`
-		FaviconSource string         `json:"favicon_source"`
-		IconSource    string         `json:"icon_source"`
-		LogoSource    string         `json:"logo_source"`
+		Id          int            `json:"id"`
+		Tag         string         `json:"tag"`
+		Label       string         `json:"label"`
+		Description string         `json:"description"`
+		HomePage    HomePageObject `json:"home_page"`
+		Category    CategoryObject `json:"category"`
+		IconFields
 	} `json:"entity"`
 }
 
@@ -62,18 +52,13 @@ type GeolocationProperty struct {
 }
 
 type NetworkProperty struct {
-	Id            int            `json:"id"`
-	Tag           string         `json:"tag"`
-	Label         string         `json:"label"`
-	Description   string         `json:"description"`
-	HomePage      HomePageObject `json:"home_page"`
-	Category      CategoryObject `json:"category"`
-	Favicon       string         `json:"favicon"`
-	Icon          string         `json:"icon"`
-	Logo          string         `json:"logo"`
-	FaviconSource string         `json:"favicon_source"`
-	IconSource    string         `json:"icon_source"`
-	LogoSource    string         `json:"logo_source"`
+	Id          int            `json:"id"`
+	Tag         string         `json:"tag"`
+	Label       string         `json:"label"`
+	Description string         `json:"description"`
+	HomePage    HomePageObject `json:"home_page"`
+	Category    CategoryObject `json:"category"`
+	IconFields
 }
 
 type PopProperty struct {
@@ -105,9 +90,17 @@ type CategoryObject struct {
 	Label string `json:"label"`
 }
 
-type PlatformProperty struct {
-	ApplicationProperty
+type IconFields struct {
+	Favicon       string `json:"favicon"`
+	Icon          string `json:"icon"`
+	Logo          string `json:"logo"`
+	FaviconSource string `json:"favicon_source"`
+	IconSource    string `json:"icon_source"`
+	LogoSource    string `json:"logo_source"`
 }
+
+// PlatformProperty Platform property is the same as Application property
+type PlatformProperty ApplicationProperty
 
 // IPData Only the desired data is considered, there could be more data like the VPN, TOR etc...
 // https://www.netify.ai/documentation/data-feeds/v2/objects/ip
