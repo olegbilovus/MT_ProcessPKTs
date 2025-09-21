@@ -136,18 +136,18 @@ func main() {
 				ipsMap[ip] = ipNetifyData
 			}
 
-			ipNetify.AppTag = ipNetifyData.Data.RDNS.Application.Tag
-			ipNetify.AppCategoryTag = ipNetifyData.Data.RDNS.Application.Category.Tag
+			ipNetify.AppTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Tag)
+			ipNetify.AppCategoryTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Category.Tag)
 			geoData := ipNetifyData.Data.Geolocation
 			if geoData != nil {
 				ipNetify.GeoContinent = geoData.Continent.Label
 				ipNetify.GeoCountry = geoData.Country.Label
+				ipNetify.GeoCity = geoData.City.Label
 				if lon, err := strconv.ParseFloat(geoData.Coordinates.Longitude, 64); err == nil {
 					ipNetify.GeoLongitude = lon
 				} else {
 					log.Fatalf("error parsing geo_lon from Netify: %v", err)
 				}
-
 				if lat, err := strconv.ParseFloat(geoData.Coordinates.Latitude, 64); err == nil {
 					ipNetify.GeoLatitude = lat
 				} else {
@@ -166,10 +166,12 @@ func main() {
 			Symbol("ip_src_netify_app_category_tag", pkt.IpSrcNetify.AppCategoryTag).
 			Symbol("ip_src_netify_geo_continent", pkt.IpSrcNetify.GeoContinent).
 			Symbol("ip_src_netify_geo_country", pkt.IpSrcNetify.GeoCountry).
+			Symbol("ip_src_netify_geo_city", pkt.IpSrcNetify.GeoCity).
 			Symbol("ip_dst_netify_app_tag", pkt.IpDstNetify.AppTag).
 			Symbol("ip_dst_netify_app_category_tag", pkt.IpDstNetify.AppCategoryTag).
 			Symbol("ip_dst_netify_geo_continent", pkt.IpDstNetify.GeoContinent).
 			Symbol("ip_dst_netify_geo_country", pkt.IpDstNetify.GeoCountry).
+			Symbol("ip_dst_netify_geo_city", pkt.IpDstNetify.GeoCity).
 			Float64Column("ip_src_netify_geo_lon", pkt.IpSrcNetify.GeoLongitude).
 			Float64Column("ip_src_netify_geo_lat", pkt.IpSrcNetify.GeoLatitude).
 			Float64Column("ip_dst_netify_geo_lon", pkt.IpDstNetify.GeoLongitude).

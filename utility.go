@@ -31,3 +31,11 @@ func ConvertTimestamp(timestampStr string) (time.Time, error) {
 
 	return time.Unix(seconds, nanoseconds), nil
 }
+
+func DefaultIfEmpty(s string) string {
+	if len(s) == 0 {
+		return UNKNOWN
+	}
+
+	return s
+}

@@ -166,6 +166,7 @@ type NetifyIP struct {
 	AppCategoryTag string  `json:"app_category_tag"`
 	GeoContinent   string  `json:"geo_continent"`
 	GeoCountry     string  `json:"geo_country"`
+	GeoCity        string  `json:"geo_city"`
 	GeoLongitude   float64 `json:"geo_lon"`
 	GeoLatitude    float64 `json:"geo_lat"`
 }

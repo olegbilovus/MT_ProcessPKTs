@@ -44,12 +44,14 @@ func CreatePacketTable(URL string, experimentName string) error {
 			ip_src_netify_app_category_tag SYMBOL,
 			ip_src_netify_geo_continent SYMBOL,
 			ip_src_netify_geo_country SYMBOL,
+			ip_src_netify_geo_city SYMBOL,
 			ip_src_netify_geo_lon DOUBLE,
 			ip_src_netify_geo_lat DOUBLE,
 			ip_dst_netify_app_tag SYMBOL,
 			ip_dst_netify_app_category_tag SYMBOL,
 			ip_dst_netify_geo_continent SYMBOL,
 			ip_dst_netify_geo_country SYMBOL,
+			ip_dst_netify_geo_city SYMBOL,
 			ip_dst_netify_geo_lon DOUBLE,
 			ip_dst_netify_geo_lat DOUBLE
 		), INDEX(tls_sni) TIMESTAMP(ts) PARTITION BY DAY WAL;`
