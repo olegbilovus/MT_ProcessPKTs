@@ -142,8 +142,17 @@ func main() {
 			if geoData != nil {
 				ipNetify.GeoContinent = geoData.Continent.Label
 				ipNetify.GeoCountry = geoData.Country.Label
-				ipNetify.GeoLongitude = geoData.Coordinates.Longitude
-				ipNetify.GeoLatitude = geoData.Coordinates.Latitude
+				if lon, err := strconv.ParseFloat(geoData.Coordinates.Longitude, 64); err == nil {
+					ipNetify.GeoLongitude = lon
+				} else {
+					log.Fatalf("error parsing geo_lon from Netify: %v", err)
+				}
+
+				if lat, err := strconv.ParseFloat(geoData.Coordinates.Latitude, 64); err == nil {
+					ipNetify.GeoLatitude = lat
+				} else {
+					log.Fatalf("error parsing geo_lat from Netify: %v", err)
+				}
 			}
 		}
 
@@ -161,10 +170,10 @@ func main() {
 			Symbol("ip_dst_netify_app_category_tag", pkt.IpDstNetify.AppCategoryTag).
 			Symbol("ip_dst_netify_geo_continent", pkt.IpDstNetify.GeoContinent).
 			Symbol("ip_dst_netify_geo_country", pkt.IpDstNetify.GeoCountry).
-			StringColumn("ip_src_netify_geo_lon", pkt.IpSrcNetify.GeoLongitude).
-			StringColumn("ip_src_netify_geo_lat", pkt.IpSrcNetify.GeoLatitude).
-			StringColumn("ip_dst_netify_geo_lon", pkt.IpDstNetify.GeoLongitude).
-			StringColumn("ip_dst_netify_geo_lat", pkt.IpDstNetify.GeoLatitude).
+			Float64Column("ip_src_netify_geo_lon", pkt.IpSrcNetify.GeoLongitude).
+			Float64Column("ip_src_netify_geo_lat", pkt.IpSrcNetify.GeoLatitude).
+			Float64Column("ip_dst_netify_geo_lon", pkt.IpDstNetify.GeoLongitude).
+			Float64Column("ip_dst_netify_geo_lat", pkt.IpDstNetify.GeoLatitude).
 			StringColumn("ip_src", pkt.IpSrc).
 			Int64Column("port_src", int64(pkt.PortSrc)).
 			StringColumn("ip_dst", pkt.IpDst).

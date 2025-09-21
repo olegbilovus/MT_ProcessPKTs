@@ -162,12 +162,12 @@ func GetIpType(ipStr string) IpType {
 }
 
 type NetifyIP struct {
-	AppTag         string `json:"app_tag"`
-	AppCategoryTag string `json:"app_category_tag"`
-	GeoContinent   string `json:"geo_continent"`
-	GeoCountry     string `json:"geo_country"`
-	GeoLongitude   string `json:"geo_lon"`
-	GeoLatitude    string `json:"geo_lat"`
+	AppTag         string  `json:"app_tag"`
+	AppCategoryTag string  `json:"app_category_tag"`
+	GeoContinent   string  `json:"geo_continent"`
+	GeoCountry     string  `json:"geo_country"`
+	GeoLongitude   float64 `json:"geo_lon"`
+	GeoLatitude    float64 `json:"geo_lat"`
 }
 
 type Packet struct {
