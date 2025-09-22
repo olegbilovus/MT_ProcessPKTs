@@ -131,6 +131,7 @@
             "type": "questdb-questdb-datasource",
             "uid": "${DS_QUESTDB}"
           },
+          "description": "This panel visualizes the sum of bytes transmitted per sample rate over time, helping to analyze data flow trends effectively.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -292,11 +293,11 @@
               "selectedFormat": 0
             }
           ],
-          "title": "Bytes/$sample_rate",
+          "title": "Bytes Transferred per Sample Rate ($sample_rate) for each ip_dst, tls_sni",
           "type": "timeseries"
         }
       ],
-      "title": "Packets bytes/$sample_rate",
+      "title": "Packets",
       "type": "row"
     },
     {
@@ -445,7 +446,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "Pie chart shows the numbers and proportion of Geo IPs. This is the outgoing traffic. The total of \"Value\" may be different from the Incoming vs Outgoing Pie chart below because sometimes it happens that the database ha no data about an IP and that IP is not counted in this pie chart.",
+      "description": "This panel visualizes the geographical distribution of outgoing IP addresses, highlighting the diversity in traffic sources for enhanced network analysis.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -546,6 +547,7 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
+      "description": "This panel visualizes the distribution of TLS Application-Layer Protocol Negotiation (ALPN) identifiers in outbound traffic",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -625,6 +627,7 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
+      "description": "This panel visualizes the distribution of TLS SNI (Server Name Indication) egress traffic",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -718,6 +721,292 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
+      "description": "This panel visualizes the distribution of egress packets by extracting the hostname from the TLS SNI (Server Name Indication) information. It sends this hostname to Netify to retrieve data about the type of application associated with it. This analysis focuses solely on egress traffic, allowing for a detailed examination of traffic metrics linked to specific application identifiers behind each hostname.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "bytes/$sample_rate",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          },
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT tls_sni_netify_app_tag as app, ts as time, sum(frame_len) as ' ',\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+          "refId": "A",
+          "selectedFormat": 0
+        }
+      ],
+      "title": "Netify Hostname TLS SNI Application Tag Bytes Transferred per Sample Rate ($sample_rate)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "description": "This panel visualizes the distribution of egress packets by extracting the hostname from the TLS SNI (Server Name Indication) information. It sends this hostname to Netify to retrieve data about the type of application associated with it. This analysis focuses solely on egress traffic, allowing for a detailed examination of traffic metrics linked to specific application identifiers behind each hostname.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "bytes/$sample_rate",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "builderOptions": {
+            "fields": [
+              "ts",
+              "frame_len"
+            ],
+            "filters": [],
+            "groupBy": [],
+            "limit": "",
+            "metrics": [
+              {
+                "aggregation": "sum",
+                "alias": "",
+                "field": "frame_len"
+              }
+            ],
+            "mode": "trend",
+            "orderBy": [
+              {
+                "dir": "ASC",
+                "name": "ts"
+              }
+            ],
+            "partitionBy": [],
+            "sampleByAlignTo": "CALENDAR",
+            "sampleByFill": [
+              "NONE_0"
+            ],
+            "table": "packets_test",
+            "timeField": "ts"
+          },
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          },
+          "expand": false,
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "fields": [
+                "ts",
+                "frame_len"
+              ],
+              "filters": [],
+              "groupBy": [],
+              "limit": "",
+              "metrics": [
+                {
+                  "aggregation": "sum",
+                  "alias": "",
+                  "field": "frame_len"
+                }
+              ],
+              "mode": "trend",
+              "orderBy": [
+                {
+                  "dir": "ASC",
+                  "name": "ts"
+                }
+              ],
+              "partitionBy": [],
+              "sampleByAlignTo": "CALENDAR",
+              "sampleByFill": [
+                "NONE_0"
+              ],
+              "table": "packets_test",
+              "timeField": "ts"
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT tls_sni_netify_app_tag as app, ip_dst_netify_geo_country as country, ts as time, sum(frame_len) as ' ',\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+          "refId": "A",
+          "selectedFormat": 0
+        }
+      ],
+      "title": "Netify Hostname TLS SNI Application Tag Bytes Transferred per Sample Rate ($sample_rate)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "description": "This panel visualizes the distribution of egress application tags for Netify IPs. It takes the IP address, sends it to Netify, which performs a reverse DNS lookup to gather information about the application associated with the IP. This analysis focuses specifically on egress traffic, helping to track and understand the types of applications generating outgoing packets.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -738,7 +1027,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 29
+        "y": 67
       },
       "id": 9,
       "options": {
@@ -798,6 +1087,7 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
+      "description": "This panel visualizes the distribution of egress packets by extracting the hostname from the TLS SNI (Server Name Indication) information. It sends this hostname to Netify to retrieve data about the type of application associated with it. This analysis focuses solely on egress traffic, allowing for a detailed examination of traffic metrics linked to specific application identifiers behind each hostname.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -818,87 +1108,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 29
-      },
-      "id": 15,
-      "options": {
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^pkts$/",
-          "values": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.1.1",
-      "targets": [
-        {
-          "format": 1,
-          "meta": {
-            "builderOptions": {
-              "fields": [],
-              "limit": "",
-              "mode": "list",
-              "timeField": ""
-            }
-          },
-          "queryType": "sql",
-          "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
-          "refId": "A",
-          "selectedFormat": 2,
-          "datasource": {
-            "type": "questdb-questdb-datasource",
-            "uid": "${DS_QUESTDB}"
-          }
-        }
-      ],
-      "title": "Netify IP RDNS Application Category Tag Egress",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "questdb-questdb-datasource",
-        "uid": "${DS_QUESTDB}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 12,
-        "x": 0,
-        "y": 39
+        "y": 67
       },
       "id": 14,
       "options": {
@@ -958,6 +1168,88 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
+      "description": "This panel visualizes the distribution of egress packets categorized by Netify IP application tags. It processes the IP addresses, sending them to Netify for reverse DNS lookups, which retrieve information about the application categories associated with each IP. This analysis focuses specifically on egress traffic, providing insights into the types of applications that are being accessed based on their destination categories.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 77
+      },
+      "id": 15,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^pkts$/",
+          "values": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
+          "refId": "A",
+          "selectedFormat": 2,
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          }
+        }
+      ],
+      "title": "Netify IP RDNS Application Category Tag Egress",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "description": "This panel visualizes the distribution of egress packets categorized by TLS SNI application tags. It takes the hostname from the TLS SNI, sends it to Netify, and retrieves data about the application category associated with that hostname. This analysis focuses exclusively on egress traffic, helping to identify traffic patterns and application usage based on the categorized information obtained from the hostname.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -978,7 +1270,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 39
+        "y": 77
       },
       "id": 11,
       "options": {
@@ -1140,13 +1432,13 @@
     ]
   },
   "time": {
-    "from": "2025-08-27T14:14:32.796Z",
+    "from": "2025-08-27T14:32:43.622Z",
     "to": "2025-09-04T03:57:08.475Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 61,
+  "version": 70,
   "weekStart": ""
 }
