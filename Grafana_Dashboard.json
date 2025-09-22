@@ -117,7 +117,7 @@
       "type": "williamvenner-timepickerbuttons-panel"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -125,180 +125,179 @@
         "y": 3
       },
       "id": 12,
-      "panels": [
+      "panels": [],
+      "title": "Packets",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
+      "description": "This panel visualizes the sum of bytes transmitted per sample rate over time, helping to analyze data flow trends effectively.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "bytes/$sample_rate",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Total",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
         {
+          "builderOptions": {
+            "fields": [
+              "ts",
+              "frame_len"
+            ],
+            "filters": [],
+            "groupBy": [],
+            "limit": "",
+            "metrics": [
+              {
+                "aggregation": "sum",
+                "alias": "",
+                "field": "frame_len"
+              }
+            ],
+            "mode": "trend",
+            "orderBy": [
+              {
+                "dir": "ASC",
+                "name": "ts"
+              }
+            ],
+            "partitionBy": [],
+            "sampleByAlignTo": "CALENDAR",
+            "sampleByFill": [
+              "NONE_0"
+            ],
+            "table": "packets_test",
+            "timeField": "ts"
+          },
           "datasource": {
             "type": "questdb-questdb-datasource",
             "uid": "${DS_QUESTDB}"
           },
-          "description": "This panel visualizes the sum of bytes transmitted per sample rate over time, helping to analyze data flow trends effectively.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "bytes/$sample_rate",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "points",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 19,
-            "w": 24,
-            "x": 0,
-            "y": 4
-          },
-          "id": 1,
-          "options": {
-            "legend": {
-              "calcs": [
-                "sum"
+          "expand": false,
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "fields": [
+                "ts",
+                "frame_len"
               ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true,
-              "sortBy": "Total",
-              "sortDesc": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
+              "filters": [],
+              "groupBy": [],
+              "limit": "",
+              "metrics": [
+                {
+                  "aggregation": "sum",
+                  "alias": "",
+                  "field": "frame_len"
+                }
+              ],
+              "mode": "trend",
+              "orderBy": [
+                {
+                  "dir": "ASC",
+                  "name": "ts"
+                }
+              ],
+              "partitionBy": [],
+              "sampleByAlignTo": "CALENDAR",
+              "sampleByFill": [
+                "NONE_0"
+              ],
+              "table": "packets_test",
+              "timeField": "ts"
             }
           },
-          "pluginVersion": "12.1.1",
-          "targets": [
-            {
-              "builderOptions": {
-                "fields": [
-                  "ts",
-                  "frame_len"
-                ],
-                "filters": [],
-                "groupBy": [],
-                "limit": "",
-                "metrics": [
-                  {
-                    "aggregation": "sum",
-                    "alias": "",
-                    "field": "frame_len"
-                  }
-                ],
-                "mode": "trend",
-                "orderBy": [
-                  {
-                    "dir": "ASC",
-                    "name": "ts"
-                  }
-                ],
-                "partitionBy": [],
-                "sampleByAlignTo": "CALENDAR",
-                "sampleByFill": [
-                  "NONE_0"
-                ],
-                "table": "packets_test",
-                "timeField": "ts"
-              },
-              "datasource": {
-                "type": "questdb-questdb-datasource",
-                "uid": "${DS_QUESTDB}"
-              },
-              "expand": false,
-              "format": 0,
-              "meta": {
-                "builderOptions": {
-                  "fields": [
-                    "ts",
-                    "frame_len"
-                  ],
-                  "filters": [],
-                  "groupBy": [],
-                  "limit": "",
-                  "metrics": [
-                    {
-                      "aggregation": "sum",
-                      "alias": "",
-                      "field": "frame_len"
-                    }
-                  ],
-                  "mode": "trend",
-                  "orderBy": [
-                    {
-                      "dir": "ASC",
-                      "name": "ts"
-                    }
-                  ],
-                  "partitionBy": [],
-                  "sampleByAlignTo": "CALENDAR",
-                  "sampleByFill": [
-                    "NONE_0"
-                  ],
-                  "table": "packets_test",
-                  "timeField": "ts"
-                }
-              },
-              "queryType": "sql",
-              "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
-              "refId": "A",
-              "selectedFormat": 0
-            }
-          ],
-          "title": "Bytes Transferred per Sample Rate ($sample_rate) for each ip_dst, tls_sni",
-          "type": "timeseries"
+          "queryType": "sql",
+          "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+          "refId": "A",
+          "selectedFormat": 0
         }
       ],
-      "title": "Packets",
-      "type": "row"
+      "title": "Bytes Transferred per Sample Rate ($sample_rate) for each ip_dst, tls_sni",
+      "type": "timeseries"
     },
     {
       "collapsed": false,
@@ -306,7 +305,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 23
       },
       "id": 6,
       "panels": [],
@@ -356,7 +355,7 @@
         "h": 12,
         "w": 17,
         "x": 0,
-        "y": 5
+        "y": 24
       },
       "id": 7,
       "options": {
@@ -467,7 +466,7 @@
         "h": 12,
         "w": 7,
         "x": 17,
-        "y": 5
+        "y": 24
       },
       "id": 8,
       "options": {
@@ -569,7 +568,7 @@
         "h": 11,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 36
       },
       "id": 3,
       "options": {
@@ -648,7 +647,7 @@
         "h": 11,
         "w": 12,
         "x": 12,
-        "y": 17
+        "y": 36
       },
       "id": 10,
       "options": {
@@ -709,7 +708,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 47
       },
       "id": 13,
       "panels": [],
@@ -786,7 +785,7 @@
         "h": 19,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 48
       },
       "id": 16,
       "options": {
@@ -901,7 +900,7 @@
         "h": 19,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 67
       },
       "id": 17,
       "options": {
@@ -1027,7 +1026,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 67
+        "y": 86
       },
       "id": 9,
       "options": {
@@ -1087,87 +1086,6 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
-      "description": "This panel visualizes the distribution of egress packets by extracting the hostname from the TLS SNI (Server Name Indication) information. It sends this hostname to Netify to retrieve data about the type of application associated with it. This analysis focuses solely on egress traffic, allowing for a detailed examination of traffic metrics linked to specific application identifiers behind each hostname.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 12,
-        "x": 12,
-        "y": 67
-      },
-      "id": 14,
-      "options": {
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^pkts$/",
-          "values": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.1.1",
-      "targets": [
-        {
-          "format": 1,
-          "meta": {
-            "builderOptions": {
-              "fields": [],
-              "limit": "",
-              "mode": "list",
-              "timeField": ""
-            }
-          },
-          "queryType": "sql",
-          "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
-          "refId": "A",
-          "selectedFormat": 2,
-          "datasource": {
-            "type": "questdb-questdb-datasource",
-            "uid": "${DS_QUESTDB}"
-          }
-        }
-      ],
-      "title": "Netify Hostname TLS SNI Application Tag Egress",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "questdb-questdb-datasource",
-        "uid": "${DS_QUESTDB}"
-      },
       "description": "This panel visualizes the distribution of egress packets categorized by Netify IP application tags. It processes the IP addresses, sending them to Netify for reverse DNS lookups, which retrieve information about the application categories associated with each IP. This analysis focuses specifically on egress traffic, providing insights into the types of applications that are being accessed based on their destination categories.",
       "fieldConfig": {
         "defaults": {
@@ -1188,8 +1106,8 @@
       "gridPos": {
         "h": 10,
         "w": 12,
-        "x": 0,
-        "y": 77
+        "x": 12,
+        "y": 86
       },
       "id": 15,
       "options": {
@@ -1249,6 +1167,87 @@
         "type": "questdb-questdb-datasource",
         "uid": "${DS_QUESTDB}"
       },
+      "description": "This panel visualizes the distribution of egress packets by extracting the hostname from the TLS SNI (Server Name Indication) information. It sends this hostname to Netify to retrieve data about the type of application associated with it. This analysis focuses solely on egress traffic, allowing for a detailed examination of traffic metrics linked to specific application identifiers behind each hostname.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 96
+      },
+      "id": 14,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^pkts$/",
+          "values": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
+          "refId": "A",
+          "selectedFormat": 2,
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          }
+        }
+      ],
+      "title": "Netify Hostname TLS SNI Application Tag Egress",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "questdb-questdb-datasource",
+        "uid": "${DS_QUESTDB}"
+      },
       "description": "This panel visualizes the distribution of egress packets categorized by TLS SNI application tags. It takes the hostname from the TLS SNI, sends it to Netify, and retrieves data about the application category associated with that hostname. This analysis focuses exclusively on egress traffic, helping to identify traffic patterns and application usage based on the categorized information obtained from the hostname.",
       "fieldConfig": {
         "defaults": {
@@ -1270,7 +1269,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 77
+        "y": 96
       },
       "id": 11,
       "options": {
@@ -1350,15 +1349,15 @@
       },
       {
         "current": {
-          "text": "1s",
-          "value": "1s"
+          "text": "10s",
+          "value": "10s"
         },
         "description": "The rate by which the data should be sampled",
         "label": "Sample Rate",
         "name": "sample_rate",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "1s",
             "value": "1s"
           }
@@ -1432,13 +1431,13 @@
     ]
   },
   "time": {
-    "from": "2025-08-27T14:32:43.622Z",
-    "to": "2025-09-04T03:57:08.475Z"
+    "from": "2025-02-14T12:53:33.008Z",
+    "to": "2025-02-24T20:12:03.655Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 70,
+  "version": 71,
   "weekStart": ""
 }
