@@ -120,14 +120,8 @@ func muxHandle(c *CacheServer, w http.ResponseWriter, r *http.Request,
 		body = []byte("{\"Status\": \"invalid " + pathValueName + " " + pathValue + "\"}")
 	} else {
 		fileName := pathValue + ".json"
-		file := path.Join(cacheDir, fileName)
 		liveURL := endpoint + "/" + pathValue + "?x-api-key=" + c.ApiKey
-		statusCode, body = serveCachedOrLive(c.httpClient, file, liveURL, cacheStat)
-
-		if err := cacheResponse(cacheDir, fileName, body); err != nil {
-			statusCode = http.StatusInternalServerError
-			body = []byte("{\"Status\": \"error saving cache file " + file + "\"}")
-		}
+		statusCode, body = serveCachedOrLive(c.httpClient, cacheDir, fileName, liveURL, cacheStat)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -187,9 +181,10 @@ const maxRetries = 3
 const minRateLimitAvailable = 3
 
 //goland:noinspection D
-func serveCachedOrLive(httpClient *http.Client, cacheFile string, liveURL string, cacheStats *cacheStats) (int, []byte) {
-	if stat, err := os.Stat(cacheFile); err == nil && stat.Size() > 0 {
-		body, _ := os.ReadFile(cacheFile)
+func serveCachedOrLive(httpClient *http.Client, cacheDir string, fileName string, liveURL string, cacheStats *cacheStats) (int, []byte) {
+	filePath := path.Join(cacheDir, fileName)
+	if stat, err := os.Stat(filePath); err == nil && stat.Size() > 0 {
+		body, _ := os.ReadFile(filePath)
 		cacheStats.cached.Add(1)
 		return http.StatusOK, body
 	} else {
@@ -207,6 +202,9 @@ func serveCachedOrLive(httpClient *http.Client, cacheFile string, liveURL string
 
 			switch res.StatusCode {
 			case http.StatusOK:
+				if err := cacheResponse(cacheDir, fileName, body); err != nil {
+					return http.StatusInternalServerError, []byte("{\"Status\": \"error saving cache file " + filePath + "\"}")
+				}
 				cacheStats.requested.Add(1)
 				return res.StatusCode, body
 			case http.StatusTooManyRequests:
