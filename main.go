@@ -261,6 +261,7 @@ func getPackets(cmd *exec.Cmd) ([]*Packet, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Info("got tshark packets")
 
 	sniMap := make(map[IpProto]map[int]*TLS)
 	var pkts = make([]*Packet, 0, len(tsPackets))
