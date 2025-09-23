@@ -118,8 +118,8 @@ func main() {
 
 	ipsMap := map[string]*netify.IPData{}
 	hostnamesMap := map[string]*netify.HostnameData{}
-	/* Can not run this in multiple goroutines because of low rate limit and because of concurrency,
-	it would request the same resources to Netify multiple times which would lead to a higher api consumption
+	/* Can not run this in multiple goroutines because of Netify low rate limit and because of concurrency,
+	it would request the same resources to Netify multiple times before caching which would lead to a higher api consumption
 	*/
 	for _, pkt := range pkts {
 		start := time.Now()
