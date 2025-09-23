@@ -108,22 +108,22 @@ type IPData struct {
 	StatusCode    int    `json:"status_code"`
 	StatusMessage string `json:"status_message"`
 	Data          struct {
-		Address         string                  `json:"address"`
-		Version         string                  `json:"version"`
-		SharedScore     int                     `json:"shared_score"`
-		IsBogon         bool                    `json:"is_bogon"`
-		IsAnycast       bool                    `json:"is_anycast"`
-		AppCIDR         string                  `json:"app_cidr"`
-		RDNS            ReverseDNSProperty      `json:"rdns"`
-		TlsCertificate  *TLSCertificateProperty `json:"tls_certificate"`
-		Platform        *PlatformProperty       `json:"platform"`
-		Network         *NetworkProperty        `json:"network"`
-		Pop             *PopProperty            `json:"pop"`
-		AsnRoute        string                  `json:"asn_route"`
-		Asn             *ASNProperty            `json:"asn"`
-		Geolocation     *GeolocationProperty    `json:"geolocation"`
-		ApplicationList []ApplicationProperty   `json:"application_list"`
-		Hostnames       []string                `json:"hostnames"`
+		Address         string                 `json:"address"`
+		Version         string                 `json:"version"`
+		SharedScore     int                    `json:"shared_score"`
+		IsBogon         bool                   `json:"is_bogon"`
+		IsAnycast       bool                   `json:"is_anycast"`
+		AppCIDR         string                 `json:"app_cidr"`
+		RDNS            ReverseDNSProperty     `json:"rdns"`
+		TlsCertificate  TLSCertificateProperty `json:"tls_certificate"`
+		Platform        *PlatformProperty      `json:"platform"`
+		Network         *NetworkProperty       `json:"network"`
+		Pop             *PopProperty           `json:"pop"`
+		AsnRoute        string                 `json:"asn_route"`
+		Asn             *ASNProperty           `json:"asn"`
+		Geolocation     *GeolocationProperty   `json:"geolocation"`
+		ApplicationList []ApplicationProperty  `json:"application_list"`
+		Hostnames       []string               `json:"hostnames"`
 	} `json:"data"`
 }
 

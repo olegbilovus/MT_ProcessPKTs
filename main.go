@@ -37,8 +37,8 @@ func main() {
 	var name = flag.String("name", "", "name of the experiment. It will overwrite any existing ones")
 
 	var netifyApiKey = flag.String("netify-apikey", "", "Netify API key")
-	var netifyCacheServerPort = flag.Int("netify-cache-port", 3344, "Netify cache server port")
-	var netifyCacheFilesDir = flag.String("netify-cache-dir", "netify_cache", "Where cache Netify responses")
+	var netifyCacheServerPort = flag.Int("netify-cache-port", 0, "Netify cache server port. Default is random port")
+	var netifyCacheFilesDir = flag.String("netify-cache-dir", "netify_cache", "where to cache Netify responses")
 	flag.Parse()
 
 	var err error
@@ -137,8 +137,13 @@ func main() {
 				ipsMap[ip] = ipNetifyData
 			}
 
-			ipNetify.AppTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Tag)
-			ipNetify.AppCategoryTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Category.Tag)
+			var additionalAppTag, additionalAppCategoryTag string
+			if len(ipNetifyData.Data.ApplicationList) == 1 {
+				additionalAppTag = ipNetifyData.Data.ApplicationList[0].Tag
+				additionalAppCategoryTag = ipNetifyData.Data.ApplicationList[0].Category.Tag
+			}
+			ipNetify.AppTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Tag, ipNetifyData.Data.TlsCertificate.Application.Tag, additionalAppTag)
+			ipNetify.AppCategoryTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Category.Tag, ipNetifyData.Data.TlsCertificate.Application.Category.Tag, additionalAppCategoryTag)
 			geoData := ipNetifyData.Data.Geolocation
 			if geoData != nil {
 				ipNetify.GeoContinent = geoData.Continent.Label

@@ -52,7 +52,7 @@ func (c *CacheServer) Init() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ips/{ip}", c.getIpData)
 	mux.HandleFunc("/hostnames/{hostname}", c.getHostnameData)
-	mux.HandleFunc("/stats", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "{\"ips\": {\"r\":%d, \"c\": %d}, \"hostnames\": {\"r\":%d, \"c\": %d}}",
@@ -60,22 +60,29 @@ func (c *CacheServer) Init() error {
 			c.hostnameCacheStats.requested.Load(), c.hostnameCacheStats.cached.Load())
 	})
 
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(c.CacheServerPort))
+	if err != nil {
+		return err
+	}
+	c.CacheServerPort = listener.Addr().(*net.TCPAddr).Port
+	portStr := strconv.Itoa(c.CacheServerPort)
+
+	c.httpServerUrl = "http://127.0.0.1:" + portStr
 	c.httpServer = &http.Server{
-		Addr:    ":" + strconv.Itoa(c.CacheServerPort),
+		Addr:    portStr,
 		Handler: mux,
 	}
-	c.httpServerUrl = "http://localhost" + c.httpServer.Addr
 
 	go func() {
-		if err := c.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := c.httpServer.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalln(err)
 		}
 	}()
 
 	for range 10 {
-		if conn, err := net.DialTimeout("tcp", c.httpServer.Addr, 500*time.Millisecond); err == nil {
+		if conn, err := net.DialTimeout("tcp", ":"+portStr, 500*time.Millisecond); err == nil {
 			conn.Close()
-			log.Warning("netify cache server started")
+			log.Warning("netify cache server started at http://127.0.0.1:", portStr)
 			c.isServerOn = true
 			return nil
 		}
