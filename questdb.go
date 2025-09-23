@@ -12,9 +12,6 @@ func InitQuestDB(URL string, experimentName string) error {
 		return fmt.Errorf("unable to ping database. status code: %d, err :%v", res.StatusCode, err)
 	}
 
-	if err := InsertIntoExperimentsTable(URL, experimentName); err != nil {
-		return err
-	}
 	if err := DeletePacketTable(URL, experimentName); err != nil {
 		return err
 	}
@@ -68,33 +65,6 @@ func CreatePacketTable(URL string, experimentName string) error {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("error creating table, status: %s, body: %s", resp.Status, string(body))
 	}
-	return err
-}
-
-func InsertIntoExperimentsTable(URL string, experimentName string) error {
-	const queryCreateTable = `
-		CREATE TABLE IF NOT EXISTS experiments (
-			  ts TIMESTAMP,
-			  name VARCHAR,
-			  active BOOLEAN
-			) TIMESTAMP(ts) PARTITION BY DAY WAL DEDUP UPSERT KEYS(ts, name);`
-
-	resp, err := http.Get(URL + "/exec?query=" + url.QueryEscape(queryCreateTable))
-	if resp.StatusCode > 299 {
-		defer resp.Body.Close()
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error creating experiments table, status: %s, body: %s", resp.Status, string(body))
-	}
-
-	const queryInsertTable = `INSERT INTO experiments VALUES(0, '%s', true);`
-	queryComplete := fmt.Sprintf(queryInsertTable, experimentName)
-	resp, err = http.Get(URL + "/exec?query=" + url.QueryEscape(queryComplete))
-	if resp.StatusCode > 299 {
-		defer resp.Body.Close()
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error inserting experiment into table, status: %s, body: %s", resp.Status, string(body))
-	}
-
 	return err
 }
 

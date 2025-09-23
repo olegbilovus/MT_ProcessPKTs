@@ -1626,12 +1626,12 @@
           "type": "questdb-questdb-datasource",
           "uid": "${DS_QUESTDB}"
         },
-        "definition": "SELECT DISTINCT name FROM experiments WHERE active = true",
+        "definition": "SELECT replace(table_name, 'packets_', '')\n  FROM (\n    SHOW TABLES\n  ) as tables\nWHERE tables.table_name LIKE 'packets_%'",
         "description": "The name of the experiment",
         "label": "Experiments",
         "name": "table",
         "options": [],
-        "query": "SELECT DISTINCT name FROM experiments WHERE active = true",
+        "query": "SELECT replace(table_name, 'packets_', '')\n  FROM (\n    SHOW TABLES\n  ) as tables\nWHERE tables.table_name LIKE 'packets_%'",
         "refresh": 1,
         "regex": "",
         "sort": 1,
@@ -1721,13 +1721,13 @@
     ]
   },
   "time": {
-    "from": "2025-08-27T14:14:32.796Z",
-    "to": "2025-09-04T03:57:08.475Z"
+    "from": "2025-02-14T12:53:33.008Z",
+    "to": "2025-02-24T20:12:03.655Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 81,
+  "version": 82,
   "weekStart": ""
 }
