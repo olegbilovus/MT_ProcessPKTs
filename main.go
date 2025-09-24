@@ -227,15 +227,15 @@ func main() {
 }
 
 func getTsharkPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]TsharkPacket, error) {
-	var tsPackets []TsharkPacket
+	var (
+		tsPackets []TsharkPacket
+		tsJson    []byte
+	)
 
 	filePath := path.Join(tsharkJsonCacheDir, experimentName+".json")
 	if stat, err := os.Stat(filePath); err == nil && stat.Size() > 0 {
-		tsharkJson, _ := os.ReadFile(filePath)
-		err = json.Unmarshal(tsharkJson, &tsPackets)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing tshark json cache %s: %v", filePath, err)
-		}
+		tsJson, _ = os.ReadFile(filePath)
+		log.Infof("using tshark json cache")
 	} else {
 		cmd := exec.Command(
 			"tshark",
@@ -257,20 +257,19 @@ func getTsharkPackets(experimentName string, tsharkJsonCacheDir string, pcapFile
 
 		fmt.Fprintln(os.Stderr, cmd.String())
 
-		output, err := cmd.Output()
+		tsJson, err = cmd.Output()
 		if err != nil {
 			return nil, fmt.Errorf("failed to run tshark: %v", err)
 		}
 
-		// This can use a lot of memory depending on the number of packets
-		var tsPackets []TsharkPacket
-		if err = json.Unmarshal(output, &tsPackets); err != nil {
-			return nil, fmt.Errorf("failed to parse JSON: %v", err)
-		}
-
-		if err = netify.CacheResponse(tsharkJsonCacheDir, experimentName+".json", output); err != nil {
+		if err = netify.CacheResponse(tsharkJsonCacheDir, experimentName+".json", tsJson); err != nil {
 			return nil, fmt.Errorf("error saving tshark to cache dir: %v", err)
 		}
+	}
+
+	// This can use a lot of memory depending on the number of packets
+	if err := json.Unmarshal(tsJson, &tsPackets); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %v", err)
 	}
 
 	return tsPackets, nil
