@@ -33,6 +33,7 @@ func main() {
 	log.SetLevel(log.InfoLevel)
 
 	var pcapFile = flag.String("pcap", "capture.pcap", "path to the pcap file")
+	var tsharkJsonCacheDir = flag.String("tshark-json-cache-dir", "tshark_json_cache", "where to cache the tshark json")
 	var filter = flag.String("filter", "", "filter to use")
 	var name = flag.String("name", "", "name of the experiment. It will overwrite any existing ones")
 
@@ -75,27 +76,7 @@ func main() {
 		}
 	}()
 
-	cmd := exec.Command(
-		"tshark",
-		"-r", *pcapFile,
-		"-Y", *filter,
-		"-T", "json",
-		"-e", "frame.time_epoch",
-		"-e", "ip.src",
-		"-e", "ip.dst",
-		"-e", "frame.len",
-		"-e", "ip.proto",
-		"-e", "tcp.port",
-		"-e", "udp.port",
-		"-e", "tls.handshake.extensions_server_name",
-		"-e", "tls.handshake.extensions_alpn_str",
-		"-e", "tcp.stream",
-		"-e", "udp.stream",
-	)
-
-	fmt.Fprintln(os.Stderr, cmd.String())
-
-	pkts, err := getPackets(cmd)
+	pkts, err := getPackets(experimentName, *tsharkJsonCacheDir, *pcapFile, *filter)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -245,24 +226,59 @@ func main() {
 	log.Infof("saved pkts in QuestDB on table: %s", GetTableName(experimentName))
 }
 
-func getTsharkPackets(cmd *exec.Cmd) ([]TsharkPacket, error) {
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run tshark: %v", err)
-	}
-
-	// This can use a lot of memory depending on the number of packets
+func getTsharkPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]TsharkPacket, error) {
 	var tsPackets []TsharkPacket
-	if err := json.Unmarshal(output, &tsPackets); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON: %v", err)
+
+	filePath := path.Join(tsharkJsonCacheDir, experimentName+".json")
+	if stat, err := os.Stat(filePath); err == nil && stat.Size() > 0 {
+		tsharkJson, _ := os.ReadFile(filePath)
+		err = json.Unmarshal(tsharkJson, &tsPackets)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing tshark json cache %s: %v", filePath, err)
+		}
+	} else {
+		cmd := exec.Command(
+			"tshark",
+			"-r", pcapFile,
+			"-Y", filter,
+			"-T", "json",
+			"-e", "frame.time_epoch",
+			"-e", "ip.src",
+			"-e", "ip.dst",
+			"-e", "frame.len",
+			"-e", "ip.proto",
+			"-e", "tcp.port",
+			"-e", "udp.port",
+			"-e", "tls.handshake.extensions_server_name",
+			"-e", "tls.handshake.extensions_alpn_str",
+			"-e", "tcp.stream",
+			"-e", "udp.stream",
+		)
+
+		fmt.Fprintln(os.Stderr, cmd.String())
+
+		output, err := cmd.Output()
+		if err != nil {
+			return nil, fmt.Errorf("failed to run tshark: %v", err)
+		}
+
+		// This can use a lot of memory depending on the number of packets
+		var tsPackets []TsharkPacket
+		if err = json.Unmarshal(output, &tsPackets); err != nil {
+			return nil, fmt.Errorf("failed to parse JSON: %v", err)
+		}
+
+		if err = netify.CacheResponse(tsharkJsonCacheDir, experimentName+".json", output); err != nil {
+			return nil, fmt.Errorf("error saving tshark to cache dir: %v", err)
+		}
 	}
 
 	return tsPackets, nil
 }
 
 //goland:noinspection D
-func getPackets(cmd *exec.Cmd) ([]*Packet, error) {
-	tsPackets, err := getTsharkPackets(cmd)
+func getPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]*Packet, error) {
+	tsPackets, err := getTsharkPackets(experimentName, tsharkJsonCacheDir, pcapFile, filter)
 	if err != nil {
 		return nil, err
 	}

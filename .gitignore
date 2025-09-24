@@ -202,4 +202,5 @@ go.work
 *.pcapng
 
 netify_cache/*
+shark_json_cache/*
 

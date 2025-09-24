@@ -209,7 +209,7 @@ func serveCachedOrLive(httpClient *http.Client, cacheDir string, fileName string
 
 			switch res.StatusCode {
 			case http.StatusOK:
-				if err := cacheResponse(cacheDir, fileName, body); err != nil {
+				if err := CacheResponse(cacheDir, fileName, body); err != nil {
 					return http.StatusInternalServerError, []byte("{\"Status\": \"error saving cache file " + filePath + "\"}")
 				}
 				cacheStats.requested.Add(1)
@@ -232,7 +232,7 @@ func serveCachedOrLive(httpClient *http.Client, cacheDir string, fileName string
 	}
 }
 
-func cacheResponse(dir string, fileName string, body []byte) error {
+func CacheResponse(dir string, fileName string, body []byte) error {
 	filePath := path.Join(dir, fileName)
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return err
