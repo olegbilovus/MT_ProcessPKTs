@@ -7,6 +7,20 @@
       "type": "datasource",
       "pluginId": "questdb-questdb-datasource",
       "pluginName": "QuestDB"
+    },
+    {
+      "name": "VAR_PACKETS_PREFIX",
+      "type": "constant",
+      "label": "packets_prefix",
+      "value": "packets_",
+      "description": ""
+    },
+    {
+      "name": "VAR_POWER_PREFIX",
+      "type": "constant",
+      "label": "power_prefix",
+      "value": "power_",
+      "description": ""
     }
   ],
   "__elements": {},
@@ -21,7 +35,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "12.1.1"
+      "version": "12.2.0"
     },
     {
       "type": "panel",
@@ -73,7 +87,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -114,7 +127,7 @@
             }
           },
           "queryType": "sql",
-          "rawSql": "SELECT MIN(ts) AS time_from, MAX(ts) AS time_to FROM packets_${table}",
+          "rawSql": "SELECT MIN(ts) AS time_from, MAX(ts) AS time_to FROM $packets_prefix$table",
           "refId": "A",
           "selectedFormat": 2
         }
@@ -170,6 +183,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -221,7 +235,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "builderOptions": {
@@ -293,7 +307,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT load, ts as time,\r\nFROM power_${table} \r\nWHERE \r\n  $__timeFilter(ts)\r\nORDER BY ts ASC",
+              "rawSql": "SELECT load, ts as time,\r\nFROM $power_prefix$table\r\nWHERE \r\n  $__timeFilter(ts)\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
@@ -339,6 +353,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -391,7 +406,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "builderOptions": {
@@ -463,7 +478,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
@@ -585,10 +600,11 @@
               "id": "coords",
               "lat": 42.540115,
               "lon": -57.367187,
+              "noRepeat": false,
               "zoom": 2.5
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "datasource": {
@@ -605,7 +621,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(ip_dst_netify_geo_country) as pkts,\r\n  ip_dst_netify_geo_continent as continent,\r\n  ip_dst_netify_geo_country as country,\r\n  ip_dst_netify_geo_city as city,\r\n  ip_dst_netify_geo_lon AS longitude,\r\n  ip_dst_netify_geo_lat as latitude\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC' AND\r\n  ip_dst_netify_geo_lon != 0.0 AND\r\n  ip_dst_netify_geo_lat != 0.0\r\nGROUP BY \r\n  ip_dst_netify_geo_country,\r\n  ip_dst_netify_geo_city,\r\n  ip_dst_netify_geo_continent, \r\n  ip_dst_netify_geo_lon, \r\n  ip_dst_netify_geo_lat",
+              "rawSql": "SELECT \r\n  count(ip_dst_netify_geo_country) as pkts,\r\n  ip_dst_netify_geo_continent as continent,\r\n  ip_dst_netify_geo_country as country,\r\n  ip_dst_netify_geo_city as city,\r\n  ip_dst_netify_geo_lon AS longitude,\r\n  ip_dst_netify_geo_lat as latitude\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC' AND\r\n  ip_dst_netify_geo_lon != 0.0 AND\r\n  ip_dst_netify_geo_lat != 0.0\r\nGROUP BY \r\n  ip_dst_netify_geo_country,\r\n  ip_dst_netify_geo_city,\r\n  ip_dst_netify_geo_continent, \r\n  ip_dst_netify_geo_lon, \r\n  ip_dst_netify_geo_lat",
               "refId": "A",
               "selectedFormat": 1
             }
@@ -663,13 +679,14 @@
               "fields": "/^pkts \\(sum\\)$/",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "datasource": {
@@ -762,13 +779,14 @@
               "fields": "",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "datasource": {
@@ -786,7 +804,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_alpn, count(*) as n\r\nFROM packets_$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY tls_alpn",
+              "rawSql": "SELECT tls_alpn, count(*) as n\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY tls_alpn",
               "refId": "A",
               "selectedFormat": 2
             }
@@ -844,13 +862,14 @@
               "fields": "/^pkts$/",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "format": 1,
@@ -863,7 +882,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(tls_sni) as pkts,\r\n  tls_sni as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni",
+              "rawSql": "SELECT \r\n  count(tls_sni) as pkts,\r\n  tls_sni as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -927,6 +946,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -953,7 +973,32 @@
               },
               "unit": "decbytes"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "  facebook"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": true,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 19,
@@ -979,7 +1024,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "datasource": {
@@ -996,7 +1041,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_sni_netify_app_tag as app, ts as time, sum(frame_len) as ' ',\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT tls_sni_netify_app_tag as app, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
@@ -1042,6 +1087,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1094,7 +1140,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "builderOptions": {
@@ -1166,7 +1212,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_sni_netify_app_tag as app, ip_dst_netify_geo_country as country, ts as time, sum(frame_len) as ' ',\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT tls_sni_netify_app_tag as app, ip_dst_netify_geo_country as country, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
@@ -1224,13 +1270,14 @@
               "fields": "/^pkts$/",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "format": 1,
@@ -1243,7 +1290,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_tag) as pkts,\r\n  ip_dst_netify_app_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_tag",
+              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_tag) as pkts,\r\n  ip_dst_netify_app_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1305,13 +1352,14 @@
               "fields": "/^pkts$/",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "format": 1,
@@ -1324,7 +1372,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
+              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1386,13 +1434,14 @@
               "fields": "/^pkts$/",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "format": 1,
@@ -1405,7 +1454,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
+              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1467,13 +1516,14 @@
               "fields": "/^pkts$/",
               "values": true
             },
+            "sort": "desc",
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "format": 1,
@@ -1486,7 +1536,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_category_tag) as pkts,\r\n  tls_sni_netify_app_category_tag as app,\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_category_tag",
+              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_category_tag) as pkts,\r\n  tls_sni_netify_app_category_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_category_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1566,7 +1616,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 279
+            "y": 506
           },
           "id": 20,
           "options": {
@@ -1615,7 +1665,7 @@
       "type": "row"
     }
   ],
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": [
@@ -1717,17 +1767,56 @@
         "regex": "",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "hide": 2,
+        "name": "packets_prefix",
+        "query": "${VAR_PACKETS_PREFIX}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_PACKETS_PREFIX}",
+          "text": "${VAR_PACKETS_PREFIX}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_PACKETS_PREFIX}",
+            "text": "${VAR_PACKETS_PREFIX}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "hide": 2,
+        "name": "power_prefix",
+        "query": "${VAR_POWER_PREFIX}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_POWER_PREFIX}",
+          "text": "${VAR_POWER_PREFIX}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_POWER_PREFIX}",
+            "text": "${VAR_POWER_PREFIX}",
+            "selected": false
+          }
+        ]
       }
     ]
   },
   "time": {
-    "from": "2025-02-14T12:53:33.008Z",
-    "to": "2025-02-24T20:12:03.655Z"
+    "from": "2025-08-27T14:14:32.796Z",
+    "to": "2025-09-04T03:57:08.475Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 82,
-  "weekStart": ""
+  "version": 84,
+  "weekStart": "",
+  "id": null
 }
