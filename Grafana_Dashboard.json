@@ -51,6 +51,12 @@
     },
     {
       "type": "panel",
+      "id": "state-timeline",
+      "name": "State timeline",
+      "version": ""
+    },
+    {
+      "type": "panel",
       "id": "table",
       "name": "Table",
       "version": ""
@@ -80,7 +86,63 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "questdb-questdb-datasource",
+          "uid": "${DS_QUESTDB}"
+        },
+        "enable": false,
+        "filter": {
+          "exclude": false,
+          "ids": [
+            1,
+            19
+          ]
+        },
+        "hide": false,
+        "iconColor": "#E02F44",
+        "mappings": {
+          "id": {
+            "source": "field",
+            "value": "id"
+          },
+          "text": {
+            "source": "field",
+            "value": "word"
+          },
+          "time": {
+            "source": "field",
+            "value": "TIME"
+          },
+          "timeEnd": {
+            "source": "field",
+            "value": "END"
+          }
+        },
+        "name": "Annotation test",
+        "target": {
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "fields": [],
+              "limit": "",
+              "mode": "list",
+              "timeField": ""
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \"TIME\", \"END\", label as word FROM 'dialogo_alpacino.csv'",
+          "refId": "Anno",
+          "selectedFormat": 2
+        }
       }
     ]
   },
@@ -142,6 +204,284 @@
         "w": 24,
         "x": 0,
         "y": 3
+      },
+      "id": 23,
+      "panels": [
+        {
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisPlacement": "auto",
+                "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "id": 22,
+          "options": {
+            "alignValue": "center",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "mergeValues": true,
+            "rowHeight": 0.9,
+            "showValue": "auto",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "format": 1,
+              "meta": {
+                "builderOptions": {
+                  "fields": [],
+                  "limit": "",
+                  "mode": "list",
+                  "timeField": ""
+                }
+              },
+              "queryType": "sql",
+              "rawSql": "SELECT ts as time, \"END\", label as word \r\nFROM 'dialogo_alpacino.csv'\r\nWHERE \r\n  $__timeFilter(ts)",
+              "refId": "A",
+              "selectedFormat": 2,
+              "datasource": {
+                "type": "questdb-questdb-datasource",
+                "uid": "${DS_QUESTDB}"
+              }
+            }
+          ],
+          "title": "Dialogo Alpacino Timeline",
+          "type": "state-timeline"
+        },
+        {
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "db linear scale",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "id": 24,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "builderOptions": {
+                "0": "T",
+                "1": "h",
+                "2": "e",
+                "3": " ",
+                "4": "q",
+                "5": "u",
+                "6": "e",
+                "7": "r",
+                "8": "y",
+                "9": " ",
+                "10": "c",
+                "11": "a",
+                "12": "n",
+                "13": "'",
+                "14": "t",
+                "15": " ",
+                "16": "b",
+                "17": "e",
+                "18": " ",
+                "19": "p",
+                "20": "a",
+                "21": "r",
+                "22": "s",
+                "23": "e",
+                "24": "d",
+                "25": ".",
+                "fields": [],
+                "filters": [],
+                "groupBy": [],
+                "limit": "",
+                "metrics": [],
+                "mode": "trend",
+                "orderBy": [],
+                "partitionBy": [],
+                "sampleByAlignTo": "CALENDAR",
+                "table": "dialogo_alpacino_audio.csv",
+                "timeField": ""
+              },
+              "format": 0,
+              "meta": {
+                "builderOptions": {
+                  "0": "T",
+                  "1": "h",
+                  "2": "e",
+                  "3": " ",
+                  "4": "q",
+                  "5": "u",
+                  "6": "e",
+                  "7": "r",
+                  "8": "y",
+                  "9": " ",
+                  "10": "c",
+                  "11": "a",
+                  "12": "n",
+                  "13": "'",
+                  "14": "t",
+                  "15": " ",
+                  "16": "b",
+                  "17": "e",
+                  "18": " ",
+                  "19": "p",
+                  "20": "a",
+                  "21": "r",
+                  "22": "s",
+                  "23": "e",
+                  "24": "d",
+                  "25": ".",
+                  "fields": [],
+                  "filters": [],
+                  "groupBy": [],
+                  "limit": "",
+                  "metrics": [],
+                  "mode": "trend",
+                  "orderBy": [],
+                  "partitionBy": [],
+                  "sampleByAlignTo": "CALENDAR",
+                  "table": "dialogo_alpacino_audio.csv",
+                  "timeField": ""
+                }
+              },
+              "queryType": "sql",
+              "rawSql": "SELECT ts as time, audio \r\nFROM \"dialogo_alpacino_audio.csv\"\r\nWHERE \r\n  $__timeFilter(ts)",
+              "refId": "A",
+              "selectedFormat": 2,
+              "datasource": {
+                "type": "questdb-questdb-datasource",
+                "uid": "${DS_QUESTDB}"
+              }
+            }
+          ],
+          "title": "Dialogo Alpacino audio db linear scale",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Audio",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
       },
       "id": 12,
       "panels": [
@@ -215,7 +555,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 4
+            "y": 5
           },
           "id": 19,
           "options": {
@@ -386,7 +726,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 15
+            "y": 16
           },
           "id": 1,
           "options": {
@@ -487,7 +827,7 @@
           "type": "timeseries"
         }
       ],
-      "title": "Packets & power",
+      "title": "Packets, audio, power",
       "type": "row"
     },
     {
@@ -496,7 +836,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "id": 6,
       "panels": [
@@ -543,7 +883,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 5
+            "y": 222
           },
           "id": 7,
           "options": {
@@ -655,7 +995,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 5
+            "y": 222
           },
           "id": 8,
           "options": {
@@ -758,7 +1098,7 @@
             "h": 11,
             "w": 12,
             "x": 0,
-            "y": 17
+            "y": 292
           },
           "id": 3,
           "options": {
@@ -838,7 +1178,7 @@
             "h": 11,
             "w": 12,
             "x": 12,
-            "y": 17
+            "y": 292
           },
           "id": 10,
           "options": {
@@ -904,7 +1244,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 6
       },
       "id": 13,
       "panels": [
@@ -973,38 +1313,13 @@
               },
               "unit": "decbytes"
             },
-            "overrides": [
-              {
-                "__systemRef": "hideSeriesFrom",
-                "matcher": {
-                  "id": "byNames",
-                  "options": {
-                    "mode": "exclude",
-                    "names": [
-                      "  facebook"
-                    ],
-                    "prefix": "All except:",
-                    "readOnly": true
-                  }
-                },
-                "properties": [
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "legend": false,
-                      "tooltip": true,
-                      "viz": true
-                    }
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 6
+            "y": 223
           },
           "id": 16,
           "options": {
@@ -1120,7 +1435,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 25
+            "y": 242
           },
           "id": 17,
           "options": {
@@ -1246,7 +1561,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 44
+            "y": 261
           },
           "id": 9,
           "options": {
@@ -1328,7 +1643,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 44
+            "y": 261
           },
           "id": 15,
           "options": {
@@ -1410,7 +1725,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 54
+            "y": 271
           },
           "id": 14,
           "options": {
@@ -1492,7 +1807,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 54
+            "y": 271
           },
           "id": 11,
           "options": {
@@ -1558,7 +1873,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "id": 21,
       "panels": [
@@ -1616,7 +1931,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 506
+            "y": 781
           },
           "id": 20,
           "options": {
@@ -1809,14 +2124,14 @@
     ]
   },
   "time": {
-    "from": "2025-08-27T14:14:32.796Z",
-    "to": "2025-09-04T03:57:08.475Z"
+    "from": "2025-09-01T16:15:24.329Z",
+    "to": "2025-09-01T16:15:32.618Z"
   },
   "timepicker": {},
-  "timezone": "browser",
+  "timezone": "utc",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 84,
+  "version": 102,
   "weekStart": "",
   "id": null
 }
