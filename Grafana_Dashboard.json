@@ -21,6 +21,20 @@
       "label": "power_prefix",
       "value": "power_",
       "description": ""
+    },
+    {
+      "name": "VAR_AUDIO_PREFIX",
+      "type": "constant",
+      "label": "audio_prefix",
+      "value": "audio_",
+      "description": ""
+    },
+    {
+      "name": "VAR_TRANSCRIPT_PREFIX",
+      "type": "constant",
+      "label": "transcript_prefix",
+      "value": "transcript_",
+      "description": ""
     }
   ],
   "__elements": {},
@@ -100,19 +114,12 @@
           "uid": "${DS_QUESTDB}"
         },
         "enable": false,
-        "filter": {
-          "exclude": false,
-          "ids": [
-            1,
-            19
-          ]
-        },
         "hide": false,
         "iconColor": "#E02F44",
         "mappings": {
-          "id": {
+          "tags": {
             "source": "field",
-            "value": "id"
+            "value": "name"
           },
           "text": {
             "source": "field",
@@ -120,14 +127,14 @@
           },
           "time": {
             "source": "field",
-            "value": "TIME"
+            "value": "ts_start"
           },
           "timeEnd": {
             "source": "field",
-            "value": "END"
+            "value": "ts_end"
           }
         },
-        "name": "Annotation test",
+        "name": "Transcript words",
         "target": {
           "format": 1,
           "meta": {
@@ -139,9 +146,9 @@
             }
           },
           "queryType": "sql",
-          "rawSql": "SELECT \"TIME\", \"END\", label as word FROM 'dialogo_alpacino.csv'",
+          "rawSql": "SELECT ts_start, ts_end, word, name\r\nFROM ${transcript_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts_start)",
           "refId": "Anno",
-          "selectedFormat": 2
+          "selectedFormat": 1
         }
       }
     ]
@@ -279,7 +286,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT ts as time, \"END\", label as word \r\nFROM 'dialogo_alpacino.csv'\r\nWHERE \r\n  $__timeFilter(ts)",
+              "rawSql": "SELECT ts_start, ts_end, word\r\nFROM ${transcript_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts_start)",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -416,7 +423,7 @@
                 "table": "dialogo_alpacino_audio.csv",
                 "timeField": ""
               },
-              "format": 0,
+              "format": 1,
               "meta": {
                 "builderOptions": {
                   "0": "T",
@@ -459,7 +466,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT ts as time, audio \r\nFROM \"dialogo_alpacino_audio.csv\"\r\nWHERE \r\n  $__timeFilter(ts)",
+              "rawSql": "SELECT ts as time, audio_level \r\nFROM ${audio_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts)",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -555,7 +562,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 5
+            "y": 81
           },
           "id": 19,
           "options": {
@@ -726,7 +733,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 16
+            "y": 150
           },
           "id": 1,
           "options": {
@@ -883,7 +890,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 222
+            "y": 82
           },
           "id": 7,
           "options": {
@@ -995,7 +1002,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 222
+            "y": 82
           },
           "id": 8,
           "options": {
@@ -1098,7 +1105,7 @@
             "h": 11,
             "w": 12,
             "x": 0,
-            "y": 292
+            "y": 152
           },
           "id": 3,
           "options": {
@@ -1178,7 +1185,7 @@
             "h": 11,
             "w": 12,
             "x": 12,
-            "y": 292
+            "y": 152
           },
           "id": 10,
           "options": {
@@ -1319,7 +1326,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 223
+            "y": 7
           },
           "id": 16,
           "options": {
@@ -1435,7 +1442,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 242
+            "y": 26
           },
           "id": 17,
           "options": {
@@ -1561,7 +1568,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 261
+            "y": 45
           },
           "id": 9,
           "options": {
@@ -1643,7 +1650,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 261
+            "y": 45
           },
           "id": 15,
           "options": {
@@ -1725,7 +1732,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 271
+            "y": 55
           },
           "id": 14,
           "options": {
@@ -1807,7 +1814,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 271
+            "y": 55
           },
           "id": 11,
           "options": {
@@ -1931,7 +1938,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 781
+            "y": 1044
           },
           "id": 20,
           "options": {
@@ -2120,18 +2127,56 @@
             "selected": false
           }
         ]
+      },
+      {
+        "hide": 2,
+        "name": "audio_prefix",
+        "query": "${VAR_AUDIO_PREFIX}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AUDIO_PREFIX}",
+          "text": "${VAR_AUDIO_PREFIX}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AUDIO_PREFIX}",
+            "text": "${VAR_AUDIO_PREFIX}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "hide": 2,
+        "name": "transcript_prefix",
+        "query": "${VAR_TRANSCRIPT_PREFIX}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_TRANSCRIPT_PREFIX}",
+          "text": "${VAR_TRANSCRIPT_PREFIX}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_TRANSCRIPT_PREFIX}",
+            "text": "${VAR_TRANSCRIPT_PREFIX}",
+            "selected": false
+          }
+        ]
       }
     ]
   },
   "time": {
-    "from": "2025-09-01T16:15:24.329Z",
-    "to": "2025-09-01T16:15:32.618Z"
+    "from": "2025-08-27T14:14:32.796Z",
+    "to": "2025-09-04T03:57:08.475Z"
   },
   "timepicker": {},
-  "timezone": "utc",
+  "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 102,
+  "version": 114,
   "weekStart": "",
   "id": null
 }
