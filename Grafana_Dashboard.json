@@ -372,7 +372,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 529
+            "y": 617
           },
           "id": 24,
           "options": {
@@ -1028,7 +1028,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 48
+            "y": 6
           },
           "id": 7,
           "options": {
@@ -1140,7 +1140,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 48
+            "y": 6
           },
           "id": 8,
           "options": {
@@ -1243,7 +1243,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 60
+            "y": 18
           },
           "id": 3,
           "options": {
@@ -1324,7 +1324,7 @@
             "h": 11,
             "w": 10,
             "x": 7,
-            "y": 60
+            "y": 18
           },
           "id": 10,
           "options": {
@@ -1432,7 +1432,7 @@
             "h": 11,
             "w": 7,
             "x": 17,
-            "y": 60
+            "y": 18
           },
           "id": 26,
           "options": {
@@ -1479,7 +1479,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT (ip_proto || ':' || port_dst) AS proto, count(*) AS n\r\nFROM ${packets_prefix}${table}\r\nWHERE\r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'",
+              "rawSql": "SELECT  \r\n  count(*) AS n,\r\n  CASE\r\n    WHEN ip_proto = 'TCP' AND port_dst = 443 THEN 'TCP HTTPS'\r\n    WHEN ip_proto = 'TCP' AND port_dst = 80 THEN 'TCP HTTP'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 443 THEN 'QUIC HTTPS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 53 THEN 'DNS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 5353 THEN 'mDNS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 123 THEN 'NTP'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 1900 THEN 'SSDP'\r\n    ELSE (ip_proto || ':' || port_dst)\r\n  END AS proto\r\nFROM ${packets_prefix}${table}\r\nWHERE\r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'",
               "refId": "A",
               "selectedFormat": 2
             }
@@ -1572,7 +1572,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 72
+            "y": 160
           },
           "id": 16,
           "options": {
@@ -1688,7 +1688,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 91
+            "y": 179
           },
           "id": 17,
           "options": {
@@ -1814,7 +1814,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 110
+            "y": 198
           },
           "id": 9,
           "options": {
@@ -1896,7 +1896,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 110
+            "y": 198
           },
           "id": 15,
           "options": {
@@ -1978,7 +1978,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 120
+            "y": 208
           },
           "id": 14,
           "options": {
@@ -2060,7 +2060,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 120
+            "y": 208
           },
           "id": 11,
           "options": {
@@ -2184,7 +2184,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 1730
+            "y": 1818
           },
           "id": 20,
           "options": {
@@ -2422,7 +2422,7 @@
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 137,
+  "version": 138,
   "weekStart": "",
   "id": null
 }
