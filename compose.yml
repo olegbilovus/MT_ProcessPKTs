@@ -23,19 +23,19 @@ services:
     networks:
       - grafana
     environment:
-     - RENDERING_AUTH_TOKEN=0505e1a5b1847cde53b25f3892335950
+      - RENDERING_AUTH_TOKEN=0505e1a5b1847cde53b25f3892335950
 
   questdb:
-      container_name: questdb
-      image: questdb/questdb:latest
-      networks:
-        - grafana
-      ports:
-        - "127.0.0.1:9000:9000" # REST API and Web UI
-      #  - "127.0.0.1:8812:8812" # TCP Postgres
-      restart: unless-stopped
-      volumes:
-        - questdb_data:/var/lib/questdb
+    container_name: questdb
+    image: questdb/questdb:latest
+    networks:
+      - grafana
+    ports:
+      - "127.0.0.1:9000:9000" # REST API and Web UI
+    #  - "127.0.0.1:8812:8812" # TCP Postgres
+    restart: unless-stopped
+    volumes:
+      - questdb_data:/var/lib/questdb
 
 volumes:
   grafana-storage:
