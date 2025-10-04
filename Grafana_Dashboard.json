@@ -86,6 +86,12 @@
       "id": "williamvenner-timepickerbuttons-panel",
       "name": "Timepicker Buttons Panel",
       "version": "4.1.1"
+    },
+    {
+      "type": "panel",
+      "id": "xychart",
+      "name": "XY Chart",
+      "version": ""
     }
   ],
   "annotations": {
@@ -366,7 +372,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 270
+            "y": 529
           },
           "id": 24,
           "options": {
@@ -833,6 +839,137 @@
           ],
           "title": "Bytes Transferred per Sample Rate ($sample_rate) for each ip_dst, tls_sni",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          },
+          "description": "This panel visualizes the relationship between network packet data and power load over time",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 50,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "pointShape": "circle",
+                "pointSize": {
+                  "fixed": 5
+                },
+                "pointStrokeWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "show": "points"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "frame_len"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "decbytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "power_load"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "watt"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 35
+          },
+          "id": 25,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "mapping": "auto",
+            "series": [
+              {
+                "frame": {
+                  "matcher": {
+                    "id": "byIndex",
+                    "options": 0
+                  }
+                }
+              }
+            ],
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "format": 1,
+              "meta": {
+                "builderOptions": {
+                  "fields": [],
+                  "limit": "",
+                  "mode": "list",
+                  "timeField": ""
+                }
+              },
+              "queryType": "sql",
+              "rawSql": "WITH packets_sample AS (\r\n  SELECT ip_src, ip_dst, ts as time, sum(frame_len) as frame_len, tls_sni \r\n  FROM ${packets_prefix}${table}\r\n  WHERE\r\n    $__timeFilter(ts) AND \r\n    tls_sni ~ '${SNI:regex}' AND\r\n    ip_src_type ~ '${ip_scr_type:regex}' AND\r\n    ip_dst_type ~ '${ip_dst_type:regex}'\r\n  SAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\n  ORDER BY ts ASC\r\n),\r\npower_sample AS (\r\n  SELECT ts as time, sum(load) as load\r\n  FROM ${power_prefix}${table}\r\n  WHERE\r\n    $__timeFilter(ts)\r\n  SAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\n  ORDER BY ts ASC\r\n)\r\n\r\nSELECT ip_src, ip_dst, packets_sample.time as time, frame_len, tls_sni, load as power_load\r\nFROM \r\n  packets_sample LEFT JOIN power_sample ON packets_sample.time = power_sample.time",
+              "refId": "A",
+              "selectedFormat": 2,
+              "datasource": {
+                "type": "questdb-questdb-datasource",
+                "uid": "${DS_QUESTDB}"
+              }
+            }
+          ],
+          "title": "Traffic vs Power Load Analysis per Sample Rate ($sample_rate)",
+          "type": "xychart"
         }
       ],
       "title": "Packets and Power",
@@ -891,7 +1028,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 6
+            "y": 48
           },
           "id": 7,
           "options": {
@@ -1003,7 +1140,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 6
+            "y": 48
           },
           "id": 8,
           "options": {
@@ -1104,9 +1241,9 @@
           },
           "gridPos": {
             "h": 11,
-            "w": 12,
+            "w": 7,
             "x": 0,
-            "y": 18
+            "y": 60
           },
           "id": 3,
           "options": {
@@ -1185,9 +1322,9 @@
           },
           "gridPos": {
             "h": 11,
-            "w": 12,
-            "x": 12,
-            "y": 18
+            "w": 10,
+            "x": 7,
+            "y": 60
           },
           "id": 10,
           "options": {
@@ -1241,6 +1378,113 @@
             }
           ],
           "title": "TLS SNI Egress",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "questdb-questdb-datasource",
+            "uid": "${DS_QUESTDB}"
+          },
+          "description": "This panel displays the distribution of the Protocols and Ports",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": []
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "n"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": true,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 7,
+            "x": 17,
+            "y": 60
+          },
+          "id": 26,
+          "options": {
+            "displayLabels": [
+              "name",
+              "percent"
+            ],
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "percent"
+              ]
+            },
+            "pieType": "pie",
+            "reduceOptions": {
+              "calcs": [],
+              "fields": "",
+              "values": true
+            },
+            "sort": "desc",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "questdb-questdb-datasource",
+                "uid": "${DS_QUESTDB}"
+              },
+              "format": 1,
+              "hide": false,
+              "meta": {
+                "builderOptions": {
+                  "fields": [],
+                  "limit": "",
+                  "mode": "list",
+                  "timeField": ""
+                }
+              },
+              "queryType": "sql",
+              "rawSql": "SELECT (ip_proto || ':' || port_dst) AS proto, count(*) AS n\r\nFROM ${packets_prefix}${table}\r\nWHERE\r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'",
+              "refId": "A",
+              "selectedFormat": 2
+            }
+          ],
+          "title": "Protocol and Port Egress",
           "type": "piechart"
         }
       ],
@@ -1322,38 +1566,13 @@
               },
               "unit": "decbytes"
             },
-            "overrides": [
-              {
-                "__systemRef": "hideSeriesFrom",
-                "matcher": {
-                  "id": "byNames",
-                  "options": {
-                    "mode": "exclude",
-                    "names": [
-                      "  google"
-                    ],
-                    "prefix": "All except:",
-                    "readOnly": true
-                  }
-                },
-                "properties": [
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "legend": false,
-                      "tooltip": true,
-                      "viz": true
-                    }
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 72
           },
           "id": 16,
           "options": {
@@ -1463,38 +1682,13 @@
               },
               "unit": "decbytes"
             },
-            "overrides": [
-              {
-                "__systemRef": "hideSeriesFrom",
-                "matcher": {
-                  "id": "byNames",
-                  "options": {
-                    "mode": "exclude",
-                    "names": [
-                      "  {app=\"start-io\", country=\"Singapore\"}"
-                    ],
-                    "prefix": "All except:",
-                    "readOnly": true
-                  }
-                },
-                "properties": [
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "legend": false,
-                      "tooltip": true,
-                      "viz": true
-                    }
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 91
           },
           "id": 17,
           "options": {
@@ -1620,7 +1814,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 45
+            "y": 110
           },
           "id": 9,
           "options": {
@@ -1702,7 +1896,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 45
+            "y": 110
           },
           "id": 15,
           "options": {
@@ -1784,7 +1978,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 55
+            "y": 120
           },
           "id": 14,
           "options": {
@@ -1866,7 +2060,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 120
           },
           "id": 11,
           "options": {
@@ -1990,7 +2184,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 1471
+            "y": 1730
           },
           "id": 20,
           "options": {
@@ -2228,7 +2422,7 @@
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 123,
+  "version": 137,
   "weekStart": "",
   "id": null
 }
