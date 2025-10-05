@@ -14,11 +14,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/olegbilovus/MT_ProcessPKTs/netify"
+	"github.com/olegbilovus/MT_ProcessPKTs/pkg/netify"
 	"github.com/questdb/go-questdb-client/v4"
 	log "github.com/sirupsen/logrus"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
+
+	"github.com/olegbilovus/MT_ProcessPKTs/internal/packet"
+	questdbinit "github.com/olegbilovus/MT_ProcessPKTs/internal/questdb"
+	"github.com/olegbilovus/MT_ProcessPKTs/internal/utility"
 )
 
 //goland:noinspection D
@@ -51,7 +55,7 @@ func main() {
 		experimentName = strings.TrimSuffix(experimentName, filepath.Ext(experimentName))
 	}
 
-	if err := InitQuestDB("http://127.0.0.1:9000", experimentName); err != nil {
+	if err := questdbinit.InitQuestDB("http://127.0.0.1:9000", experimentName); err != nil {
 		log.Fatalf("failed to init QuestDB: %v", err)
 	}
 
@@ -104,7 +108,7 @@ func main() {
 	*/
 	for _, pkt := range pkts {
 		start := time.Now()
-		ips := map[string]*NetifyIP{
+		ips := map[string]*packet.NetifyIP{
 			pkt.IpSrc: &pkt.IpSrcNetify,
 			pkt.IpDst: &pkt.IpDstNetify,
 		}
@@ -123,8 +127,8 @@ func main() {
 				additionalAppTag = ipNetifyData.Data.ApplicationList[0].Tag
 				additionalAppCategoryTag = ipNetifyData.Data.ApplicationList[0].Category.Tag
 			}
-			ipNetify.AppTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Tag, ipNetifyData.Data.TlsCertificate.Application.Tag, additionalAppTag)
-			ipNetify.AppCategoryTag = DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Category.Tag, ipNetifyData.Data.TlsCertificate.Application.Category.Tag, additionalAppCategoryTag)
+			ipNetify.AppTag = utility.DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Tag, ipNetifyData.Data.TlsCertificate.Application.Tag, additionalAppTag)
+			ipNetify.AppCategoryTag = utility.DefaultIfEmpty(ipNetifyData.Data.RDNS.Application.Category.Tag, ipNetifyData.Data.TlsCertificate.Application.Category.Tag, additionalAppCategoryTag)
 			geoData := ipNetifyData.Data.Geolocation
 			if geoData != nil {
 				ipNetify.GeoContinent = geoData.Continent.Label
@@ -143,7 +147,7 @@ func main() {
 			}
 		}
 
-		if len(pkt.Sni) != 0 && pkt.Sni != UNKNOWN {
+		if len(pkt.Sni) != 0 && pkt.Sni != utility.UNKNOWN {
 			netifySNI, ok := hostnamesMap[pkt.Sni]
 			if !ok {
 				netifySNI, err = netifyCacheServer.QueryHostnameData(pkt.Sni)
@@ -157,20 +161,20 @@ func main() {
 				}
 				hostnamesMap[pkt.Sni] = netifySNI
 			}
-			pkt.SNINetify.AppTag = DefaultIfEmpty(netifySNI.Data.Application.Tag)
-			pkt.SNINetify.AppCategoryTag = DefaultIfEmpty(netifySNI.Data.Application.Category.Tag)
+			pkt.SNINetify.AppTag = utility.DefaultIfEmpty(netifySNI.Data.Application.Tag)
+			pkt.SNINetify.AppCategoryTag = utility.DefaultIfEmpty(netifySNI.Data.Application.Category.Tag)
 			if netifySNI.Data.Domain != nil {
-				pkt.SNINetify.DomainCategoryTag = DefaultIfEmpty(netifySNI.Data.Domain.Category.Tag)
+				pkt.SNINetify.DomainCategoryTag = utility.DefaultIfEmpty(netifySNI.Data.Domain.Category.Tag)
 			} else {
-				pkt.SNINetify.DomainCategoryTag = UNKNOWN
+				pkt.SNINetify.DomainCategoryTag = utility.UNKNOWN
 			}
 		} else {
-			pkt.SNINetify.AppTag = UNKNOWN
-			pkt.SNINetify.AppCategoryTag = UNKNOWN
-			pkt.SNINetify.DomainCategoryTag = UNKNOWN
+			pkt.SNINetify.AppTag = utility.UNKNOWN
+			pkt.SNINetify.AppCategoryTag = utility.UNKNOWN
+			pkt.SNINetify.DomainCategoryTag = utility.UNKNOWN
 		}
 
-		err := client.Table(GetTableName(experimentName)).
+		err := client.Table(questdbinit.GetTableName(experimentName)).
 			Symbol("ip_proto", pkt.IpProto.String()).
 			Symbol("tls_sni", pkt.Sni).
 			Symbol("tls_alpn", pkt.Alpn).
@@ -223,12 +227,12 @@ func main() {
 		"hostnames_requested": hostnameRequested,
 	}).Info("Netify cache server stats")
 
-	log.Infof("saved pkts in QuestDB on table: %s", GetTableName(experimentName))
+	log.Infof("saved pkts in QuestDB on table: %s", questdbinit.GetTableName(experimentName))
 }
 
-func getTsharkPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]TsharkPacket, error) {
+func getTsharkPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]packet.TsharkPacket, error) {
 	var (
-		tsPackets []TsharkPacket
+		tsPackets []packet.TsharkPacket
 		tsJson    []byte
 	)
 
@@ -276,15 +280,15 @@ func getTsharkPackets(experimentName string, tsharkJsonCacheDir string, pcapFile
 }
 
 //goland:noinspection D
-func getPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]*Packet, error) {
+func getPackets(experimentName string, tsharkJsonCacheDir string, pcapFile string, filter string) ([]*packet.Packet, error) {
 	tsPackets, err := getTsharkPackets(experimentName, tsharkJsonCacheDir, pcapFile, filter)
 	if err != nil {
 		return nil, err
 	}
 	log.Info("got tshark packets")
 
-	sniMap := make(map[IpProto]map[int]*TLS)
-	var pkts = make([]*Packet, 0, len(tsPackets))
+	sniMap := make(map[packet.IpProto]map[int]*packet.TLS)
+	var pkts = make([]*packet.Packet, 0, len(tsPackets))
 	for _, tsPkt := range tsPackets {
 		pkt, err := tsPkt.ToPacket()
 		if err != nil {
@@ -292,11 +296,11 @@ func getPackets(experimentName string, tsharkJsonCacheDir string, pcapFile strin
 		}
 
 		if _, ok := sniMap[pkt.IpProto]; !ok {
-			sniMap[pkt.IpProto] = make(map[int]*TLS)
+			sniMap[pkt.IpProto] = make(map[int]*packet.TLS)
 		}
 
 		if _, ok := sniMap[pkt.IpProto][pkt.StreamIndex]; !ok {
-			sniMap[pkt.IpProto][pkt.StreamIndex] = &TLS{UNKNOWN, UNKNOWN}
+			sniMap[pkt.IpProto][pkt.StreamIndex] = &packet.TLS{Sni: utility.UNKNOWN, Alpn: utility.UNKNOWN}
 		}
 
 		tls := sniMap[pkt.IpProto][pkt.StreamIndex]

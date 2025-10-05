@@ -1,10 +1,12 @@
-package main
+package packet
 
 import (
 	"fmt"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/olegbilovus/MT_ProcessPKTs/internal/utility"
 )
 
 type TsharkPacket struct {
@@ -32,7 +34,7 @@ func (p *TsharkPacket) ToPacket() (*Packet, error) {
 		pktTime time.Time
 		err     error
 	)
-	if pktTime, err = ConvertTimestamp(tsPkt.TimeEpoch[0]); err != nil {
+	if pktTime, err = utility.ConvertTimestamp(tsPkt.TimeEpoch[0]); err != nil {
 		return nil, err
 	}
 
@@ -148,7 +150,7 @@ func (p IpType) String() string {
 	case PUBLIC:
 		return "PUBLIC"
 	default:
-		return UNKNOWN
+		return utility.UNKNOWN
 
 	}
 }

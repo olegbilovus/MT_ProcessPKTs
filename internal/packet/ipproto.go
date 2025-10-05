@@ -1,6 +1,10 @@
-package main
+package packet
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/olegbilovus/MT_ProcessPKTs/internal/utility"
+)
 
 type IpProto int
 
@@ -467,7 +471,7 @@ func (p IpProto) String() string {
 	case Reserved:
 		return "Reserved"
 	default:
-		return UNKNOWN
+		return utility.UNKNOWN
 	}
 }
 
