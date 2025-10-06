@@ -162,6 +162,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": null,
   "links": [],
   "panels": [
     {
@@ -372,7 +373,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 617
+            "y": 833
           },
           "id": 24,
           "options": {
@@ -575,13 +576,15 @@
           "options": {
             "legend": {
               "calcs": [
-                "min",
+                "logmin",
                 "max",
-                "sum"
+                "sum",
+                "p95",
+                "p99"
               ],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "hideZeros": false,
@@ -740,7 +743,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 16
+            "y": 74
           },
           "id": 1,
           "options": {
@@ -919,7 +922,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 35
+            "y": 93
           },
           "id": 25,
           "options": {
@@ -1028,7 +1031,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 6
+            "y": 106
           },
           "id": 7,
           "options": {
@@ -1140,7 +1143,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 6
+            "y": 106
           },
           "id": 8,
           "options": {
@@ -1150,7 +1153,7 @@
             ],
             "legend": {
               "displayMode": "table",
-              "placement": "bottom",
+              "placement": "right",
               "showLegend": true,
               "values": [
                 "percent"
@@ -1243,7 +1246,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 18
+            "y": 118
           },
           "id": 3,
           "options": {
@@ -1324,7 +1327,7 @@
             "h": 11,
             "w": 10,
             "x": 7,
-            "y": 18
+            "y": 118
           },
           "id": 10,
           "options": {
@@ -1432,7 +1435,7 @@
             "h": 11,
             "w": 7,
             "x": 17,
-            "y": 18
+            "y": 118
           },
           "id": 26,
           "options": {
@@ -1566,13 +1569,38 @@
               },
               "unit": "decbytes"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "  instagram"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": true,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 160
+            "y": 7
           },
           "id": 16,
           "options": {
@@ -1688,7 +1716,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 179
+            "y": 26
           },
           "id": 17,
           "options": {
@@ -1814,7 +1842,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 198
+            "y": 45
           },
           "id": 9,
           "options": {
@@ -1896,7 +1924,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 198
+            "y": 45
           },
           "id": 15,
           "options": {
@@ -1978,7 +2006,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 208
+            "y": 55
           },
           "id": 14,
           "options": {
@@ -2060,7 +2088,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 208
+            "y": 55
           },
           "id": 11,
           "options": {
@@ -2184,7 +2212,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 1818
+            "y": 2034
           },
           "id": 20,
           "options": {
@@ -2422,7 +2450,6 @@
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 138,
-  "weekStart": "",
-  "id": null
+  "version": 154,
+  "weekStart": ""
 }
