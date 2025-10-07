@@ -162,7 +162,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -373,7 +372,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 833
+            "y": 1425
           },
           "id": 24,
           "options": {
@@ -743,7 +742,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 74
+            "y": 16
           },
           "id": 1,
           "options": {
@@ -835,12 +834,12 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT ip_src, ip_dst, ts as time, sum(frame_len) as ' ', tls_sni \r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT \r\n  ts as time, \r\n  sum(frame_len) as ' ', tls_sni,\r\n  CASE\r\n    WHEN ip_dst_type = 'PUBLIC' THEN 'egress'\r\n    ELSE 'ingress'\r\n  END AS flow\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
           ],
-          "title": "Bytes Transferred per Sample Rate ($sample_rate) for each ip_dst, tls_sni",
+          "title": "Bytes Transferred per Sample Rate ($sample_rate) for each tls_sni",
           "type": "timeseries"
         },
         {
@@ -922,7 +921,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 93
+            "y": 35
           },
           "id": 25,
           "options": {
@@ -962,7 +961,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "WITH packets_sample AS (\r\n  SELECT ip_src, ip_dst, ts as time, sum(frame_len) as frame_len, tls_sni \r\n  FROM ${packets_prefix}${table}\r\n  WHERE\r\n    $__timeFilter(ts) AND \r\n    tls_sni ~ '${SNI:regex}' AND\r\n    ip_src_type ~ '${ip_scr_type:regex}' AND\r\n    ip_dst_type ~ '${ip_dst_type:regex}'\r\n  SAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\n  ORDER BY ts ASC\r\n),\r\npower_sample AS (\r\n  SELECT ts as time, sum(load) as load\r\n  FROM ${power_prefix}${table}\r\n  WHERE\r\n    $__timeFilter(ts)\r\n  SAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\n  ORDER BY ts ASC\r\n)\r\n\r\nSELECT ip_src, ip_dst, packets_sample.time as time, frame_len, tls_sni, load as power_load\r\nFROM \r\n  packets_sample LEFT JOIN power_sample ON packets_sample.time = power_sample.time",
+              "rawSql": "WITH packets_sample AS (\r\n  SELECT ip_src, ip_dst, ts as time, sum(frame_len) as frame_len, tls_sni \r\n  FROM ${packets_prefix}${table}\r\n  WHERE\r\n    $__timeFilter(ts) AND \r\n    tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}'\r\n  SAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\n  ORDER BY ts ASC\r\n),\r\npower_sample AS (\r\n  SELECT ts as time, sum(load) as load\r\n  FROM ${power_prefix}${table}\r\n  WHERE\r\n    $__timeFilter(ts)\r\n  SAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\n  ORDER BY ts ASC\r\n)\r\n\r\nSELECT ip_src, ip_dst, packets_sample.time as time, frame_len, tls_sni, load as power_load\r\nFROM \r\n  packets_sample LEFT JOIN power_sample ON packets_sample.time = power_sample.time",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1031,7 +1030,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 106
+            "y": 213
           },
           "id": 7,
           "options": {
@@ -1109,7 +1108,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(ip_dst_netify_geo_country) as pkts,\r\n  ip_dst_netify_geo_continent as continent,\r\n  ip_dst_netify_geo_country as country,\r\n  ip_dst_netify_geo_city as city,\r\n  ip_dst_netify_geo_lon AS longitude,\r\n  ip_dst_netify_geo_lat as latitude\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC' AND\r\n  ip_dst_netify_geo_lon != 0.0 AND\r\n  ip_dst_netify_geo_lat != 0.0\r\nGROUP BY \r\n  ip_dst_netify_geo_country,\r\n  ip_dst_netify_geo_city,\r\n  ip_dst_netify_geo_continent, \r\n  ip_dst_netify_geo_lon, \r\n  ip_dst_netify_geo_lat",
+              "rawSql": "SELECT \r\n  count(ip_dst_netify_geo_country) as pkts,\r\n  ip_dst_netify_geo_continent as continent,\r\n  ip_dst_netify_geo_country as country,\r\n  ip_dst_netify_geo_city as city,\r\n  ip_dst_netify_geo_lon AS longitude,\r\n  ip_dst_netify_geo_lat as latitude\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC' AND\r\n  ip_dst_netify_geo_lon != 0.0 AND\r\n  ip_dst_netify_geo_lat != 0.0\r\nGROUP BY \r\n  ip_dst_netify_geo_country,\r\n  ip_dst_netify_geo_city,\r\n  ip_dst_netify_geo_continent, \r\n  ip_dst_netify_geo_lon, \r\n  ip_dst_netify_geo_lat",
               "refId": "A",
               "selectedFormat": 1
             }
@@ -1143,7 +1142,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 106
+            "y": 213
           },
           "id": 8,
           "options": {
@@ -1246,7 +1245,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 118
+            "y": 225
           },
           "id": 3,
           "options": {
@@ -1293,7 +1292,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_alpn, count(*) as n\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY tls_alpn",
+              "rawSql": "SELECT tls_alpn, count(*) as n\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY tls_alpn",
               "refId": "A",
               "selectedFormat": 2
             }
@@ -1327,7 +1326,7 @@
             "h": 11,
             "w": 10,
             "x": 7,
-            "y": 118
+            "y": 225
           },
           "id": 10,
           "options": {
@@ -1371,7 +1370,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(tls_sni) as pkts,\r\n  tls_sni as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni",
+              "rawSql": "SELECT \r\n  count(tls_sni) as pkts,\r\n  tls_sni as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1435,7 +1434,7 @@
             "h": 11,
             "w": 7,
             "x": 17,
-            "y": 118
+            "y": 225
           },
           "id": 26,
           "options": {
@@ -1482,7 +1481,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT  \r\n  count(*) AS n,\r\n  CASE\r\n    WHEN ip_proto = 'TCP' AND port_dst = 443 THEN 'TCP HTTPS'\r\n    WHEN ip_proto = 'TCP' AND port_dst = 80 THEN 'TCP HTTP'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 443 THEN 'QUIC HTTPS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 53 THEN 'DNS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 5353 THEN 'mDNS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 123 THEN 'NTP'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 1900 THEN 'SSDP'\r\n    ELSE (ip_proto || ':' || port_dst)\r\n  END AS proto\r\nFROM ${packets_prefix}${table}\r\nWHERE\r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'",
+              "rawSql": "SELECT  \r\n  count(*) AS n,\r\n  CASE\r\n    WHEN ip_proto = 'TCP' AND port_dst = 443 THEN 'TCP HTTPS'\r\n    WHEN ip_proto = 'TCP' AND port_dst = 80 THEN 'TCP HTTP'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 443 THEN 'QUIC HTTPS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 53 THEN 'DNS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 5353 THEN 'mDNS'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 123 THEN 'NTP'\r\n    WHEN ip_proto = 'UDP' AND port_dst = 1900 THEN 'SSDP'\r\n    ELSE (ip_proto || ':' || port_dst)\r\n  END AS proto\r\nFROM ${packets_prefix}${table}\r\nWHERE\r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'",
               "refId": "A",
               "selectedFormat": 2
             }
@@ -1600,7 +1599,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 214
           },
           "id": 16,
           "options": {
@@ -1637,7 +1636,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_sni_netify_app_tag as app, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT tls_sni_netify_app_tag as app, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
@@ -1716,7 +1715,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 233
           },
           "id": 17,
           "options": {
@@ -1808,7 +1807,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_sni_netify_app_tag as app, ip_dst_netify_geo_country as country, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT tls_sni_netify_app_tag as app, ip_dst_netify_geo_country as country, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND \r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
@@ -1842,7 +1841,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 45
+            "y": 252
           },
           "id": 9,
           "options": {
@@ -1886,7 +1885,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_tag) as pkts,\r\n  ip_dst_netify_app_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_tag",
+              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_tag) as pkts,\r\n  ip_dst_netify_app_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -1924,7 +1923,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 45
+            "y": 252
           },
           "id": 15,
           "options": {
@@ -1968,7 +1967,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
+              "rawSql": "SELECT \r\n  count(ip_dst_netify_app_category_tag) as pkts,\r\n  ip_dst_netify_app_category_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  ip_dst_netify_app_category_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -2006,7 +2005,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 55
+            "y": 262
           },
           "id": 14,
           "options": {
@@ -2050,7 +2049,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
+              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_tag) as pkts,\r\n  tls_sni_netify_app_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -2088,7 +2087,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 262
           },
           "id": 11,
           "options": {
@@ -2132,7 +2131,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_category_tag) as pkts,\r\n  tls_sni_netify_app_category_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_category_tag",
+              "rawSql": "SELECT \r\n  count(tls_sni_netify_app_category_tag) as pkts,\r\n  tls_sni_netify_app_category_tag as app,\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nGROUP BY \r\n  tls_sni_netify_app_category_tag",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -2172,11 +2171,14 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": false
+                  "type": "auto"
                 },
                 "filterable": true,
-                "inspect": false
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false,
+                "wrapText": false
               },
               "mappings": [],
               "thresholds": {
@@ -2212,26 +2214,16 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 2034
+            "y": 2626
           },
           "id": 20,
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "enablePagination": true,
-              "fields": [
-                "frame_len"
-              ],
-              "reducer": [
-                "median"
-              ],
-              "show": false
-            },
+            "enablePagination": true,
             "showHeader": true,
             "sortBy": []
           },
-          "pluginVersion": "12.1.1",
+          "pluginVersion": "12.2.0",
           "targets": [
             {
               "datasource": {
@@ -2248,7 +2240,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT *\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND \r\n  ip_src_type ~ '${ip_scr_type:regex}' AND\r\n  ip_dst_type ~ '${ip_dst_type:regex}'\r\nORDER BY ts ASC",
+              "rawSql": "SELECT *\r\nFROM packets_${table} \r\nWHERE \r\n  $__timeFilter(ts) AND \r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}'\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 2
             }
@@ -2310,7 +2302,7 @@
           "uid": "${DS_QUESTDB}"
         },
         "definition": "SELECT DISTINCT  tls_sni FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni != ''",
-        "description": "The TLS Server Name  Indication",
+        "description": "The TLS Server Name Indication",
         "includeAll": true,
         "label": "SNI",
         "multi": true,
@@ -2324,44 +2316,24 @@
       },
       {
         "allValue": ".*",
-        "allowCustomValue": false,
         "current": {},
-        "datasource": {
-          "type": "questdb-questdb-datasource",
-          "uid": "${DS_QUESTDB}"
-        },
-        "definition": "SELECT DISTINCT ip_src_type FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni != ''",
-        "description": "Local or Public IP",
-        "includeAll": true,
-        "label": "IP src type",
+        "definition": "SELECT DISTINCT  tls_sni FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni ~ '${SNI:regex}'",
+        "description": "The TLS Server Name Indication to exclude",
+        "includeAll": false,
+        "label": "SNI exclude",
         "multi": true,
-        "name": "ip_scr_type",
+        "name": "SNI_EXCLUDE",
         "options": [],
-        "query": "SELECT DISTINCT ip_src_type FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni != ''",
+        "query": "SELECT DISTINCT  tls_sni FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni ~ '${SNI:regex}'",
         "refresh": 2,
         "regex": "",
         "sort": 1,
-        "type": "query"
-      },
-      {
-        "allValue": ".*",
-        "allowCustomValue": false,
-        "current": {},
-        "datasource": {
-          "type": "questdb-questdb-datasource",
-          "uid": "${DS_QUESTDB}"
-        },
-        "definition": "SELECT DISTINCT ip_dst_type FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni != ''",
-        "description": "Local or Public IP",
-        "includeAll": true,
-        "label": "IP dst type",
-        "multi": true,
-        "name": "ip_dst_type",
-        "options": [],
-        "query": "SELECT DISTINCT ip_dst_type FROM packets_$table WHERE $__timeFilter(ts) AND tls_sni != ''",
-        "refresh": 2,
-        "regex": "",
-        "sort": 1,
+        "staticOptions": [
+          {
+            "text": "None",
+            "value": "^$"
+          }
+        ],
         "type": "query"
       },
       {
@@ -2443,13 +2415,14 @@
     ]
   },
   "time": {
-    "from": "2025-08-27T14:14:32.796Z",
-    "to": "2025-09-04T03:57:08.475Z"
+    "from": "2025-09-30T16:34:33.642Z",
+    "to": "2025-10-07T15:39:23.708Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 154,
-  "weekStart": ""
+  "version": 191,
+  "weekStart": "",
+  "id": null
 }
