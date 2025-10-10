@@ -41,6 +41,12 @@
   "__requires": [
     {
       "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
       "id": "geomap",
       "name": "Geomap",
       "version": ""
@@ -152,7 +158,7 @@
             }
           },
           "queryType": "sql",
-          "rawSql": "SELECT ts_start, ts_end, word, name\r\nFROM ${transcript_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts_start)\r\n  AND word ~ '${transcription_words:regex}'",
+          "rawSql": "SELECT ts_start, ts_end, word, name\r\nFROM ${transcript_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts_start)\r\n  AND word ~ '${transcription_words:regex}'\r\n  AND word !~ '${transcription_words_exclude:regex}'",
           "refId": "Anno",
           "selectedFormat": 1
         }
@@ -487,7 +493,7 @@
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT ts_start, ts_end, word\r\nFROM ${transcript_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts_start)",
+              "rawSql": "SELECT ts_start, ts_end, word\r\nFROM ${transcript_prefix}${table}\r\nWHERE \r\n  $__timeFilter(ts_start)\r\n  AND word ~ '${transcription_words:regex}'\r\n  AND word !~ '${transcription_words_exclude:regex}'",
               "refId": "A",
               "selectedFormat": 2,
               "datasource": {
@@ -498,6 +504,120 @@
           ],
           "title": "Words timeline",
           "type": "state-timeline"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "description": "Shows which are the most used words",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 28,
+          "options": {
+            "displayMode": "basic",
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "maxVizHeight": 300,
+            "minVizHeight": 16,
+            "minVizWidth": 8,
+            "namePlacement": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "first"
+              ],
+              "fields": "/^word \\(count\\)$/",
+              "limit": 25,
+              "values": true
+            },
+            "showUnfilled": false,
+            "sizing": "auto",
+            "text": {},
+            "valueMode": "color"
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "adHocFiltersEnabled": false,
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 22,
+              "refId": "A"
+            }
+          ],
+          "title": "Most used words",
+          "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "word"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "groupBy",
+              "options": {
+                "fields": {
+                  "word": {
+                    "aggregations": [
+                      "count"
+                    ],
+                    "operation": "groupby"
+                  }
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "word (count)"
+                  }
+                ]
+              }
+            }
+          ],
+          "type": "bargauge"
         }
       ],
       "title": "Audio transcription",
@@ -583,7 +703,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 42
           },
           "id": 19,
           "options": {
@@ -756,7 +876,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 35
+            "y": 53
           },
           "id": 1,
           "options": {
@@ -935,7 +1055,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 54
+            "y": 72
           },
           "id": 25,
           "options": {
@@ -1044,7 +1164,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 1886
+            "y": 1904
           },
           "id": 7,
           "options": {
@@ -1157,7 +1277,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 1886
+            "y": 1904
           },
           "id": 8,
           "options": {
@@ -1261,7 +1381,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 1898
+            "y": 1916
           },
           "id": 3,
           "options": {
@@ -1343,7 +1463,7 @@
             "h": 11,
             "w": 10,
             "x": 7,
-            "y": 1898
+            "y": 1916
           },
           "id": 10,
           "options": {
@@ -1452,7 +1572,7 @@
             "h": 11,
             "w": 7,
             "x": 17,
-            "y": 1898
+            "y": 1916
           },
           "id": 26,
           "options": {
@@ -1592,7 +1712,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 1887
+            "y": 1905
           },
           "id": 16,
           "options": {
@@ -1708,7 +1828,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 1906
+            "y": 1924
           },
           "id": 17,
           "options": {
@@ -1860,7 +1980,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 1925
+            "y": 1943
           },
           "id": 9,
           "options": {
@@ -1943,7 +2063,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 1925
+            "y": 1943
           },
           "id": 15,
           "options": {
@@ -2026,7 +2146,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 1935
+            "y": 1953
           },
           "id": 14,
           "options": {
@@ -2109,7 +2229,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 1935
+            "y": 1953
           },
           "id": 11,
           "options": {
@@ -2236,7 +2356,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 4860
+            "y": 4878
           },
           "id": 20,
           "options": {
@@ -2271,7 +2391,7 @@
           "type": "table"
         }
       ],
-      "title": "Packets table",
+      "title": "Packets table (a lot of data, takes time to load)",
       "type": "row"
     }
   ],
@@ -2387,6 +2507,28 @@
         "query": "SELECT word\nFROM ${transcript_prefix}${table}\nWHERE \n  $__timeFilter(ts_start) AND\n  name ~ '${transcription_audio:ragex}'",
         "refresh": 2,
         "regex": "",
+        "staticOptions": [],
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "definition": "SELECT word\nFROM ${transcript_prefix}${table}\nWHERE \n  $__timeFilter(ts_start) AND\n  name ~ '${transcription_audio:ragex}'",
+        "description": "Filter which words not to show",
+        "includeAll": false,
+        "label": "Transcription Words Exclude",
+        "multi": true,
+        "name": "transcription_words_exclude",
+        "options": [],
+        "query": "SELECT word\nFROM ${transcript_prefix}${table}\nWHERE \n  $__timeFilter(ts_start) AND\n  name ~ '${transcription_audio:ragex}'",
+        "refresh": 2,
+        "regex": "",
+        "staticOptions": [
+          {
+            "text": "None",
+            "value": "^$"
+          }
+        ],
         "type": "query"
       },
       {
@@ -2475,7 +2617,7 @@
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 237,
+  "version": 249,
   "weekStart": "",
   "id": null
 }
