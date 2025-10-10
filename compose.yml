@@ -32,7 +32,7 @@ services:
       - grafana
     ports:
       - "127.0.0.1:9000:9000" # REST API and Web UI
-    #  - "127.0.0.1:8812:8812" # TCP Postgres
+      - "127.0.0.1:8812:8812" # TCP Postgres
     restart: unless-stopped
     volumes:
       - questdb_data:/var/lib/questdb
