@@ -538,7 +538,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 98
           },
           "id": 28,
           "options": {
@@ -645,9 +645,9 @@
                 "mode": "continuous-GrYlRd"
               },
               "custom": {
-                "axisBorderShow": false,
+                "axisBorderShow": true,
                 "axisCenteredZero": false,
-                "axisColorMode": "text",
+                "axisColorMode": "series",
                 "axisLabel": "Watt",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
@@ -1207,7 +1207,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 205
+            "y": 289
           },
           "id": 7,
           "options": {
@@ -1320,7 +1320,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 205
+            "y": 289
           },
           "id": 8,
           "options": {
@@ -1424,7 +1424,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 217
+            "y": 301
           },
           "id": 3,
           "options": {
@@ -1506,7 +1506,7 @@
             "h": 11,
             "w": 10,
             "x": 7,
-            "y": 217
+            "y": 301
           },
           "id": 10,
           "options": {
@@ -1615,7 +1615,7 @@
             "h": 11,
             "w": 7,
             "x": 17,
-            "y": 217
+            "y": 301
           },
           "id": 26,
           "options": {
@@ -1755,7 +1755,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 206
+            "y": 290
           },
           "id": 16,
           "options": {
@@ -1871,7 +1871,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 225
+            "y": 309
           },
           "id": 17,
           "options": {
@@ -2023,7 +2023,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 244
+            "y": 328
           },
           "id": 9,
           "options": {
@@ -2106,7 +2106,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 244
+            "y": 328
           },
           "id": 15,
           "options": {
@@ -2189,7 +2189,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 254
+            "y": 338
           },
           "id": 14,
           "options": {
@@ -2272,7 +2272,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 254
+            "y": 338
           },
           "id": 11,
           "options": {
@@ -2399,7 +2399,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 5217
+            "y": 5301
           },
           "id": 20,
           "options": {
@@ -2660,7 +2660,7 @@
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 273,
+  "version": 279,
   "weekStart": "",
   "id": null
 }
