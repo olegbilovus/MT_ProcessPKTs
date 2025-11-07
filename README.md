@@ -88,10 +88,10 @@ include:
 
 ```mermaid
 graph TD
-    A[PCAP file] -->|"tshark JSON"| B(Main App)
-    B -->|"Netify API (with caching)"| C[Netify Server]
-    B -->|"Enriched Packets"| D[QuestDB]
-    D -->|"Instant Queries"| E[Grafana Dashboard]
+    A[PCAP file] -->|" tshark JSON "| B(Main App)
+    B -->|" Netify API (with caching) "| C[Netify Server]
+    B -->|" Enriched Packets "| D[QuestDB]
+    D -->|" Instant Queries "| E[Grafana Dashboard]
 ```
 
 ---
