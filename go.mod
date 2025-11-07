@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/questdb/go-questdb-client/v4 v4.0.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/vbauerster/mpb/v8 v8.10.2
+	github.com/vbauerster/mpb/v8 v8.11.1
 )
 
 require (
