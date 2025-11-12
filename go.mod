@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/questdb/go-questdb-client/v4 v4.0.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/vbauerster/mpb/v8 v8.11.1
+	github.com/vbauerster/mpb/v8 v8.11.2
 )
 
 require (
@@ -15,5 +15,5 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 )
