@@ -174,6 +174,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": null,
   "links": [],
   "panels": [
     {
@@ -214,7 +215,7 @@
             }
           },
           "queryType": "sql",
-          "rawSql": "SELECT MIN(ts) AS time_from, MAX(ts) AS time_to FROM $packets_prefix$table",
+          "rawSql": "SELECT MIN(ts) AS time_from, MAX(ts) AS time_to FROM $power_prefix$table",
           "refId": "A",
           "selectedFormat": 2
         }
@@ -316,7 +317,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.2.0",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "builderOptions": {
@@ -544,7 +545,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 299
           },
           "id": 28,
           "options": {
@@ -720,7 +721,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 308
           },
           "id": 29,
           "options": {
@@ -857,7 +858,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 23
+            "y": 308
           },
           "id": 30,
           "options": {
@@ -1050,7 +1051,7 @@
               }
             }
           ],
-          "title": "Power Cumulative Distribution, min load >= $power_cdf_min W",
+          "title": "Power values distribution, min load >= $power_cdf_min W",
           "type": "trend"
         },
         {
@@ -1627,7 +1628,7 @@
             "h": 12,
             "w": 17,
             "x": 0,
-            "y": 90
+            "y": 176
           },
           "id": 7,
           "options": {
@@ -1740,7 +1741,7 @@
             "h": 12,
             "w": 7,
             "x": 17,
-            "y": 90
+            "y": 176
           },
           "id": 8,
           "options": {
@@ -1844,7 +1845,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 160
+            "y": 304
           },
           "id": 3,
           "options": {
@@ -1926,7 +1927,7 @@
             "h": 11,
             "w": 10,
             "x": 7,
-            "y": 160
+            "y": 304
           },
           "id": 10,
           "options": {
@@ -2035,7 +2036,7 @@
             "h": 11,
             "w": 7,
             "x": 17,
-            "y": 160
+            "y": 304
           },
           "id": 26,
           "options": {
@@ -2175,7 +2176,7 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 8
+            "y": 177
           },
           "id": 16,
           "options": {
@@ -2291,9 +2292,9 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 27
+            "y": 196
           },
-          "id": 17,
+          "id": 32,
           "options": {
             "legend": {
               "calcs": [
@@ -2314,81 +2315,26 @@
           "pluginVersion": "12.2.1",
           "targets": [
             {
-              "builderOptions": {
-                "fields": [
-                  "ts",
-                  "frame_len"
-                ],
-                "filters": [],
-                "groupBy": [],
-                "limit": "",
-                "metrics": [
-                  {
-                    "aggregation": "sum",
-                    "alias": "",
-                    "field": "frame_len"
-                  }
-                ],
-                "mode": "trend",
-                "orderBy": [
-                  {
-                    "dir": "ASC",
-                    "name": "ts"
-                  }
-                ],
-                "partitionBy": [],
-                "sampleByAlignTo": "CALENDAR",
-                "sampleByFill": [
-                  "NONE_0"
-                ],
-                "table": "packets_test",
-                "timeField": "ts"
-              },
               "datasource": {
                 "type": "questdb-questdb-datasource",
                 "uid": "${DS_QUESTDB}"
               },
-              "expand": false,
               "format": 0,
               "meta": {
                 "builderOptions": {
-                  "fields": [
-                    "ts",
-                    "frame_len"
-                  ],
-                  "filters": [],
-                  "groupBy": [],
+                  "fields": [],
                   "limit": "",
-                  "metrics": [
-                    {
-                      "aggregation": "sum",
-                      "alias": "",
-                      "field": "frame_len"
-                    }
-                  ],
-                  "mode": "trend",
-                  "orderBy": [
-                    {
-                      "dir": "ASC",
-                      "name": "ts"
-                    }
-                  ],
-                  "partitionBy": [],
-                  "sampleByAlignTo": "CALENDAR",
-                  "sampleByFill": [
-                    "NONE_0"
-                  ],
-                  "table": "packets_test",
-                  "timeField": "ts"
+                  "mode": "list",
+                  "timeField": ""
                 }
               },
               "queryType": "sql",
-              "rawSql": "SELECT tls_sni_netify_app_tag as app, ip_dst_netify_geo_country as country, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table \r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  tls_sni ~ '${SNI:regex}' AND tls_sni !~ '${SNI_EXCLUDE:regex}' AND \r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
+              "rawSql": "SELECT ip_dst_netify_app_tag as app, ts as time, sum(frame_len) as ' ',\r\nFROM $packets_prefix$table\r\nWHERE \r\n  $__timeFilter(ts) AND\r\n  ip_dst_type ~ 'PUBLIC'\r\nSAMPLE BY ${sample_rate} ALIGN TO CALENDAR\r\nORDER BY ts ASC",
               "refId": "A",
               "selectedFormat": 0
             }
           ],
-          "title": "Netify Hostname TLS SNI Application Tag Bytes Transferred per Sample Rate ($sample_rate)",
+          "title": "Netify IP RDNS Application Tag Bytes Transferred per Sample Rate ($sample_rate)",
           "type": "timeseries"
         },
         {
@@ -2420,7 +2366,8 @@
                   "options": {
                     "mode": "exclude",
                     "names": [
-                      "pkts"
+                      "pkts",
+                      "bytedance"
                     ],
                     "prefix": "All except:",
                     "readOnly": true
@@ -2443,7 +2390,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 215
           },
           "id": 9,
           "options": {
@@ -2526,7 +2473,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 215
           },
           "id": 15,
           "options": {
@@ -2609,7 +2556,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 56
+            "y": 225
           },
           "id": 14,
           "options": {
@@ -2692,7 +2639,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 56
+            "y": 225
           },
           "id": 11,
           "options": {
@@ -2819,7 +2766,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 6196
+            "y": 6818
           },
           "id": 20,
           "options": {
@@ -2869,12 +2816,12 @@
           "type": "questdb-questdb-datasource",
           "uid": "${DS_QUESTDB}"
         },
-        "definition": "SELECT replace(table_name, 'packets_', '')\n  FROM (\n    SHOW TABLES\n  ) as tables\nWHERE tables.table_name LIKE 'packets_%'",
+        "definition": "SELECT replace(replace(table_name, '${power_prefix}', ''), '${packets_prefix}', '')\n  FROM (\n    SHOW TABLES\n  ) as tables\nWHERE \n  tables.table_name LIKE '${power_prefix}_%' OR\n  tables.table_name LIKE '${packets_prefix}_%'",
         "description": "The name of the experiment",
         "label": "Experiments",
         "name": "table",
         "options": [],
-        "query": "SELECT replace(table_name, 'packets_', '')\n  FROM (\n    SHOW TABLES\n  ) as tables\nWHERE tables.table_name LIKE 'packets_%'",
+        "query": "SELECT replace(replace(table_name, '${power_prefix}', ''), '${packets_prefix}', '')\n  FROM (\n    SHOW TABLES\n  ) as tables\nWHERE \n  tables.table_name LIKE '${power_prefix}_%' OR\n  tables.table_name LIKE '${packets_prefix}_%'",
         "refresh": 1,
         "regex": "",
         "sort": 1,
@@ -3113,7 +3060,6 @@
   "timezone": "browser",
   "title": "MT_EX",
   "uid": "c49baec9-8369-426b-a891-e96b2a03c08c",
-  "version": 329,
-  "weekStart": "",
-  "id": null
+  "version": 340,
+  "weekStart": ""
 }
